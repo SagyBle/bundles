@@ -1,0 +1,36 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "d7e54d6cd8ebf591a5b009889b4a4fc4"
+application_url = "https://cedar-furniture-measures-motherboard.trycloudflare.com"
+embedded = true
+name = "bundles"
+handle = "bundles-88"
+
+[webhooks]
+api_version = "2025-01"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/uninstalled" ]
+  uri = "/webhooks/app/uninstalled"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/scopes_update" ]
+  uri = "/webhooks/app/scopes_update"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "write_products"
+
+[auth]
+redirect_urls = [
+  "https://cedar-furniture-measures-motherboard.trycloudflare.com/auth/callback",
+  "https://cedar-furniture-measures-motherboard.trycloudflare.com/auth/shopify/callback",
+  "https://cedar-furniture-measures-motherboard.trycloudflare.com/api/auth/callback"
+]
+
+[pos]
+embedded = false
+
+[build]
+dev_store_url = "sagy-test-academy.myshopify.com"
+automatically_update_urls_on_dev = true
