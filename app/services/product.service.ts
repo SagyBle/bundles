@@ -123,3 +123,41 @@ export const deleteProduct = async (request: Request, productId: string) => {
 
   return deletedProductId;
 };
+
+export const getProductById = async (request: Request, productId: string) => {
+  const { admin } = await authenticate.admin(request);
+
+  const response = await admin.graphql(
+    `#graphql
+    query getProduct($id: ID!) {
+      product(id: $id) {
+        id
+        title
+        description
+        options {
+          name
+          values
+        }
+        variants(first: 10) {
+          edges {
+            node {
+              id
+              price
+              barcode
+              createdAt
+            }
+          }
+        }
+      }
+    }`,
+    { variables: { id: productId } },
+  );
+
+  const responseJson = await response.json();
+  const product = responseJson.data?.product ?? null;
+  if (!product) {
+    throw new Error(`Product with id: ${productId} was not found`);
+  }
+
+  return product;
+};

@@ -129,6 +129,10 @@ export default function Index() {
     fetcher.submit(formData, { method: "DELETE" });
   };
 
+  const getProductById = (productId: string) => {
+    fetcher.load(`/product/${productId}`);
+  };
+
   return (
     <Page>
       {/* <TitleBar title="Remix app template"></TitleBar> */}
@@ -164,6 +168,17 @@ export default function Index() {
                       Delete Product
                     </Button>
                   </InlineStack>
+
+                  <Button
+                    loading={fetcher.state === "loading"}
+                    onClick={() => getProductById(inputProductId)}
+                  >
+                    Get Product
+                  </Button>
+
+                  {fetcher.data?.product && (
+                    <pre>{JSON.stringify(fetcher.data.product, null, 2)}</pre>
+                  )}
                   {fetcher.data?.product && (
                     <Button
                       url={`shopify:admin/products/${productId}`}
