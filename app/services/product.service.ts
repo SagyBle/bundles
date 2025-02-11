@@ -1,15 +1,14 @@
 import { authenticate } from "app/shopify.server";
-import { ProductDataInput } from "app/types/product.types";
+import {
+  ProductDataInput,
+  ProductVariantUpdateInput,
+} from "app/types/product.types";
 
 export const createProduct = async (
   request: Request,
   productData: ProductDataInput,
 ) => {
   const { admin } = await authenticate.admin(request);
-
-  const color = ["Red", "Orange", "Yellow", "Green"][
-    Math.floor(Math.random() * 4)
-  ];
 
   const response = await admin.graphql(
     `#graphql
@@ -48,4 +47,45 @@ export const createProduct = async (
   }
 
   return product;
+};
+
+export const updateProductVariant = async (
+  request: Request,
+  productId: string,
+  variants: ProductVariantUpdateInput[],
+) => {
+  const { admin } = await authenticate.admin(request);
+
+  const response = await admin.graphql(
+    `#graphql
+    mutation shopifyRemixTemplateUpdateVariant(
+      $productId: ID!,
+      $variants: [ProductVariantsBulkInput!]!
+    ) {
+      productVariantsBulkUpdate(productId: $productId, variants: $variants) {
+        productVariants {
+          id
+          price
+          barcode
+          createdAt
+        }
+      }
+    }`,
+    {
+      variables: {
+        productId,
+        variants,
+      },
+    },
+  );
+
+  const responseJson = await response.json();
+  const updatedVariants =
+    responseJson.data?.productVariantsBulkUpdate?.productVariants;
+
+  if (!updatedVariants) {
+    throw new Error("Failed to update product variant");
+  }
+
+  return updatedVariants;
 };

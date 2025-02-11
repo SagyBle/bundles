@@ -15,7 +15,10 @@ import {
 } from "@shopify/polaris";
 import { TitleBar, useAppBridge } from "@shopify/app-bridge-react";
 import { authenticate } from "../shopify.server";
-import { createProduct } from "app/services/product.service";
+import {
+  createProduct,
+  updateProductVariant,
+} from "app/services/product.service";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   await authenticate.admin(request);
@@ -26,70 +29,21 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 export const action = async ({ request }: ActionFunctionArgs) => {
   const { admin } = await authenticate.admin(request);
 
-  // const response = await admin.graphql(
-  //   `#graphql
-  //     mutation populateProduct($product: ProductCreateInput!) {
-  //       productCreate(product: $product) {
-  //         product {
-  //           id
-  //           title
-  //           handle
-  //           status
-  //           variants(first: 10) {
-  //             edges {
-  //               node {
-  //                 id
-  //                 price
-  //                 barcode
-  //                 createdAt
-  //               }
-  //             }
-  //           }
-  //         }
-  //       }
-  //     }`,
-  //   {
-  //     variables: {
-  //       product: {
-  //         title: `${color} Snowboard`,
-  //       },
-  //     },
-  //   },
-  // );
-  // const responseJson = await response.json();
-
-  // const product = responseJson.data!.productCreate!.product!;
   const product = await createProduct(request, {
-    title: "get title from function",
+    title: "making sure variants updated!",
   });
+
+  // mock variables
   const variantId = product.variants.edges[0]!.node!.id!;
 
-  const variantResponse = await admin.graphql(
-    `#graphql
-    mutation shopifyRemixTemplateUpdateVariant($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
-      productVariantsBulkUpdate(productId: $productId, variants: $variants) {
-        productVariants {
-          id
-          price
-          barcode
-          createdAt
-        }
-      }
-    }`,
-    {
-      variables: {
-        productId: product.id,
-        variants: [{ id: variantId, price: "100.00" }],
-      },
-    },
-  );
-
-  const variantResponseJson = await variantResponse.json();
+  const updatedVariant = await updateProductVariant(request, product.id, [
+    { id: variantId, price: "100.00" },
+  ]);
 
   return {
+    success: true,
     product,
-    variant:
-      variantResponseJson!.data!.productVariantsBulkUpdate!.productVariants,
+    variant: updatedVariant,
   };
 };
 
