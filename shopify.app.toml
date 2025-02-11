@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "d7e54d6cd8ebf591a5b009889b4a4fc4"
-application_url = "https://conducted-fr-laboratory-memories.trycloudflare.com"
+application_url = "https://published-violation-research-decade.trycloudflare.com"
 embedded = true
 name = "bundles"
 handle = "bundles-88"
@@ -23,9 +23,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://conducted-fr-laboratory-memories.trycloudflare.com/auth/callback",
-  "https://conducted-fr-laboratory-memories.trycloudflare.com/auth/shopify/callback",
-  "https://conducted-fr-laboratory-memories.trycloudflare.com/api/auth/callback"
+  "https://published-violation-research-decade.trycloudflare.com/auth/callback",
+  "https://published-violation-research-decade.trycloudflare.com/auth/shopify/callback",
+  "https://published-violation-research-decade.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

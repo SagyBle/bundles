@@ -28,39 +28,28 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   return null;
 };
 
-// export const action = async ({ request }: ActionFunctionArgs) => {
-//   const { admin } = await authenticate.admin(request);
-
-//   const product = await createProduct(request, {
-//     title: "making sure variants updated!",
-//   });
-
-//   // mock variables
-//   const variantId = product.variants.edges[0]!.node!.id!;
-
-//   const updatedVariant = await updateProductVariants(request, product.id, [
-//     { id: variantId, price: "100.00" },
-//   ]);
-
-//   return {
-//     success: true,
-//     product,
-//     variant: updatedVariant,
-//   };
-// };
-
 export const action = async ({ request }: ActionFunctionArgs) => {
   if (request.method === "POST") {
-    const product = await createProduct(request, {
-      title: "Generated Product",
-    });
+    try {
+      const product = await createProduct(request, {
+        title: "Generated Product",
+      });
 
-    const variantId = product.variants.edges[0]?.node?.id;
-    const updatedVariant = await updateProductVariants(request, product.id, [
-      { id: variantId, price: "100.00" },
-    ]);
+      const variantId = product.variants.edges[0]?.node?.id;
 
-    return { success: true, product, variant: updatedVariant };
+      if (!variantId) {
+        throw new Error("Failed to retrieve product variant ID.");
+      }
+
+      const updatedVariant = await updateProductVariants(request, product.id, [
+        { id: variantId, price: "100.00" },
+      ]);
+
+      return { success: true, product, variant: updatedVariant };
+    } catch (error: any) {
+      console.error("Error creating product or updating variant:", error);
+      return { success: false, error: error.message };
+    }
   }
 
   if (request.method === "DELETE") {
@@ -158,7 +147,7 @@ export default function Index() {
                   </Button> */}
                   <InlineStack gap="300">
                     <TextField
-                      label="Enter Product ID to Delete"
+                      label="Enter Product ID:"
                       value={inputProductId}
                       onChange={(value) => setInputProductId(value)}
                       autoComplete="off"

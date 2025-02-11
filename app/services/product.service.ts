@@ -161,3 +161,39 @@ export const getProductById = async (request: Request, productId: string) => {
 
   return product;
 };
+
+export const getProductMetafields = async (
+  request: Request,
+  productId: string,
+) => {
+  const { admin } = await authenticate.admin(request);
+
+  const response = await admin.graphql(
+    `#graphql
+    query getProductMetafields($productId: ID!) {
+      product(id: $productId) {
+        metafields(first: 10) {
+          edges {
+            node {
+              id
+              namespace
+              key
+              value
+              type
+              description
+            }
+          }
+        }
+      }
+    }`,
+    { variables: { productId } },
+  );
+
+  const responseJson = await response.json();
+  const metafields =
+    responseJson.data?.product?.metafields?.edges.map(
+      (edge: any) => edge.node,
+    ) ?? [];
+
+  return metafields;
+};
