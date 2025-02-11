@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { useFetcher } from "@remix-run/react";
 import {
@@ -12,12 +12,14 @@ import {
   List,
   Link,
   InlineStack,
+  TextField,
 } from "@shopify/polaris";
 import { TitleBar, useAppBridge } from "@shopify/app-bridge-react";
 import { authenticate } from "../shopify.server";
 import {
   createProduct,
-  updateProductVariant,
+  deleteProduct,
+  updateProductVariants,
 } from "app/services/product.service";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -26,28 +28,74 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   return null;
 };
 
+// export const action = async ({ request }: ActionFunctionArgs) => {
+//   const { admin } = await authenticate.admin(request);
+
+//   const product = await createProduct(request, {
+//     title: "making sure variants updated!",
+//   });
+
+//   // mock variables
+//   const variantId = product.variants.edges[0]!.node!.id!;
+
+//   const updatedVariant = await updateProductVariants(request, product.id, [
+//     { id: variantId, price: "100.00" },
+//   ]);
+
+//   return {
+//     success: true,
+//     product,
+//     variant: updatedVariant,
+//   };
+// };
+
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { admin } = await authenticate.admin(request);
+  if (request.method === "POST") {
+    const product = await createProduct(request, {
+      title: "Generated Product",
+    });
 
-  const product = await createProduct(request, {
-    title: "making sure variants updated!",
-  });
+    const variantId = product.variants.edges[0]?.node?.id;
+    const updatedVariant = await updateProductVariants(request, product.id, [
+      { id: variantId, price: "100.00" },
+    ]);
 
-  // mock variables
-  const variantId = product.variants.edges[0]!.node!.id!;
+    return { success: true, product, variant: updatedVariant };
+  }
 
-  const updatedVariant = await updateProductVariant(request, product.id, [
-    { id: variantId, price: "100.00" },
-  ]);
+  if (request.method === "DELETE") {
+    try {
+      const formData = await request.formData();
+      const productId = formData.get("productId") as string;
 
-  return {
-    success: true,
-    product,
-    variant: updatedVariant,
-  };
+      if (!productId) {
+        throw new Error("Product ID is required to delete.");
+      }
+
+      const deletedProductId = await deleteProduct(
+        request,
+        `gid://shopify/Product/${productId}`,
+      );
+
+      console.log("sagy100", {
+        success: true,
+        deletedProductId,
+      });
+
+      return {
+        success: true,
+        deletedProductId,
+      };
+    } catch (error: any) {
+      console.error("Error deleting product:", error);
+      return { success: false, error: error.message };
+    }
+  }
 };
 
 export default function Index() {
+  const [inputProductId, setInputProductId] = useState("");
+
   const fetcher = useFetcher<typeof action>();
 
   const shopify = useAppBridge();
@@ -58,13 +106,28 @@ export default function Index() {
     "gid://shopify/Product/",
     "",
   );
+  const deletedProductId = fetcher.data?.deletedProductId;
 
   useEffect(() => {
     if (productId) {
       shopify.toast.show(`Product created with id: ${productId}`);
     }
   }, [productId, shopify]);
+
+  useEffect(() => {
+    if (deletedProductId) {
+      shopify.toast.show(`Product deleted with id: ${deletedProductId}`);
+    }
+  }, [deletedProductId, shopify]);
+
   const generateProduct = () => fetcher.submit({}, { method: "POST" });
+
+  const deleteProductById = () => {
+    if (!inputProductId.trim()) return;
+    const formData = new FormData();
+    formData.append("productId", inputProductId);
+    fetcher.submit(formData, { method: "DELETE" });
+  };
 
   return (
     <Page>
@@ -84,11 +147,23 @@ export default function Index() {
                 </BlockStack>
                 <InlineStack gap="300">
                   <Button loading={isLoading} onClick={generateProduct}>
-                    Generate a product 1
+                    Generate product 1
                   </Button>
                   {/* <Button loading={isLoading} onClick={generateProduct}>
                     Generate a product 2
                   </Button> */}
+                  <InlineStack gap="300">
+                    <TextField
+                      label="Enter Product ID to Delete"
+                      value={inputProductId}
+                      onChange={(value) => setInputProductId(value)}
+                      autoComplete="off"
+                      placeholder="e.g., 10066918539551"
+                    />
+                    <Button loading={isLoading} onClick={deleteProductById}>
+                      Delete Product
+                    </Button>
+                  </InlineStack>
                   {fetcher.data?.product && (
                     <Button
                       url={`shopify:admin/products/${productId}`}

@@ -49,7 +49,7 @@ export const createProduct = async (
   return product;
 };
 
-export const updateProductVariant = async (
+export const updateProductVariants = async (
   request: Request,
   productId: string,
   variants: ProductVariantUpdateInput[],
@@ -88,4 +88,38 @@ export const updateProductVariant = async (
   }
 
   return updatedVariants;
+};
+
+export const deleteProduct = async (request: Request, productId: string) => {
+  const { admin } = await authenticate.admin(request);
+
+  const response = await admin.graphql(
+    `#graphql
+    mutation deleteProduct($id: ID!) {
+      productDelete(input: { id: $id }) {
+        deletedProductId
+        userErrors {
+          field
+          message
+        }
+      }
+    }`,
+    { variables: { id: productId } },
+  );
+
+  const responseJson = await response.json();
+  const deletedProductId = responseJson.data?.productDelete?.deletedProductId;
+  const errors = responseJson.data?.productDelete?.userErrors;
+
+  if (errors?.length) {
+    throw new Error(
+      `Failed to delete product: ${errors.map((e: any) => e.message).join(", ")}`,
+    );
+  }
+
+  if (!deletedProductId) {
+    throw new Error("Product deletion failed");
+  }
+
+  return deletedProductId;
 };
