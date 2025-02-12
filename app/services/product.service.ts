@@ -197,3 +197,34 @@ export const getProductMetafields = async (
 
   return metafields;
 };
+
+export const getProductOptions = async (
+  request: Request,
+  productId: string,
+) => {
+  const { admin } = await authenticate.admin(request);
+
+  const response = await admin.graphql(
+    `#graphql
+    query getProductOptions($id: ID!) {
+      product(id: $id) {
+        options {
+          id
+          name
+          values
+        }
+      }
+    }`,
+    { variables: { id: productId } },
+  );
+
+  const responseJson = await response.json();
+  const options = responseJson.data?.product?.options ?? [];
+
+  // 🔴 Ensure returning the correct structure with componentOptionId
+  return options.map((option: any) => ({
+    componentOptionId: option.id, // ✅ Correct field name
+    name: option.name,
+    values: option.values,
+  }));
+};
