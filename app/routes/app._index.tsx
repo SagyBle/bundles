@@ -15,6 +15,7 @@ import {
 } from "@shopify/polaris";
 import { TitleBar, useAppBridge } from "@shopify/app-bridge-react";
 import { authenticate } from "../shopify.server";
+import DiamondViewer from "app/components/DiamondViewer";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   await authenticate.admin(request);
@@ -112,7 +113,8 @@ export default function Index() {
 
   return (
     <Page>
-      <TitleBar title="Remix app template">
+      <DiamondViewer />
+      {/* <TitleBar title="Remix app template">
         <button variant="primary" onClick={generateProduct}>
           Generate a product
         </button>
@@ -137,7 +139,7 @@ export default function Index() {
                     </Link>{" "}
                     interface examples like an{" "}
                     <Link url="/app/additional" removeUnderline>
-                      additional page in the app nav
+                      additional page in the app
                     </Link>
                     , as well as an{" "}
                     <Link
@@ -328,7 +330,7 @@ export default function Index() {
             </BlockStack>
           </Layout.Section>
         </Layout>
-      </BlockStack>
+      </BlockStack> */}
     </Page>
   );
 }
