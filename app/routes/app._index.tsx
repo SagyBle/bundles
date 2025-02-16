@@ -31,7 +31,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   if (request.method === "POST") {
     try {
       const product = await createProduct(request, {
-        title: "second",
+        title: `just created: ${new Date().toLocaleString()}`,
       });
 
       const variantId = product.variants.edges[0]?.node?.id;
@@ -117,7 +117,6 @@ export default function Index() {
 
   return (
     <Page>
-      <BundlesPage />
       <BlockStack gap="500">
         <Layout>
           <Layout.Section>
@@ -133,7 +132,7 @@ export default function Index() {
                 </BlockStack>
                 <InlineStack gap="300">
                   <Button loading={isLoading} onClick={generateProduct}>
-                    Generate product 1
+                    Generate product
                   </Button>
                   <InlineStack gap="300">
                     <TextField
@@ -143,9 +142,7 @@ export default function Index() {
                       autoComplete="off"
                       placeholder="e.g., 10066918539551"
                     />
-                    <Button loading={isLoading} onClick={deleteProductById}>
-                      Delete Product
-                    </Button>
+                    <Button onClick={deleteProductById}>Delete Product</Button>
                   </InlineStack>
 
                   <Button
@@ -216,6 +213,7 @@ export default function Index() {
           </Layout.Section>
         </Layout>
       </BlockStack>
+      <BundlesPage />
     </Page>
   );
 }
