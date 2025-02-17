@@ -38,14 +38,13 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       ShopifyResourceType.Product,
     );
 
-    const firstProductOptions = await getProductOptions(
-      request,
-      firstProductGid,
-    );
-    const secondProductOptions = await getProductOptions(
-      request,
-      secondProductGid,
-    );
+    const firstProductOptions = await getProductOptions(request, {
+      id: firstProductGid,
+    });
+
+    const secondProductOptions = await getProductOptions(request, {
+      id: secondProductGid,
+    });
 
     const bundleInput = {
       input: {

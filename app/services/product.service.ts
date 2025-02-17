@@ -1,3 +1,11 @@
+import {
+  GRAPHQL_CREATE_PRODUCT,
+  GRAPHQL_DELETE_PRODUCT,
+  GRAPHQL_GET_PRODUCT_BY_ID,
+  GRAPHQL_GET_PRODUCT_OPTIONS,
+  GRAPHQL_UPDATE_PRODUCT,
+  GRAPHQL_UPDATE_PRODUCT_VARIANTS,
+} from "app/graphql/product.queries";
 import { authenticate } from "app/shopify.server";
 import {
   ProductDataInput,
@@ -6,172 +14,93 @@ import {
 
 export const createProduct = async (
   request: Request,
-  productData: ProductDataInput,
+  input: ProductDataInput,
 ) => {
   const { admin } = await authenticate.admin(request);
 
-  const response = await admin.graphql(
-    `#graphql
-      mutation populateProduct($product: ProductCreateInput!) {
-        productCreate(product: $product) {
-          product {
-            id
-            title
-            handle
-            status
-            variants(first: 10) {
-              edges {
-                node {
-                  id
-                  price
-                  barcode
-                  createdAt
-                }
-              }
-            }
-          }
-        }
-      }`,
-    {
-      variables: {
-        product: productData,
-      },
-    },
-  );
-
+  const response = await admin.graphql(GRAPHQL_CREATE_PRODUCT, {
+    variables: { input },
+  });
   const responseJson = await response.json();
-  const product = responseJson.data!.productCreate!.product!;
 
-  if (!product) {
-    throw new Error("Failed to create product");
-  }
+  return responseJson.data?.productCreate?.product || null;
+};
 
-  return product;
+export const updateProduct = async (
+  request: Request,
+  input: { id: string; title: string },
+) => {
+  const { admin } = await authenticate.admin(request);
+
+  const response = await admin.graphql(GRAPHQL_UPDATE_PRODUCT, {
+    variables: { input },
+  });
+  const responseJson = await response.json();
+
+  return responseJson.data?.productUpdate?.product || null;
 };
 
 export const updateProductVariants = async (
   request: Request,
-  productId: string,
-  variants: ProductVariantUpdateInput[],
+  input: { productId: string; variants: ProductVariantUpdateInput[] },
 ) => {
   const { admin } = await authenticate.admin(request);
 
-  const response = await admin.graphql(
-    `#graphql
-    mutation shopifyRemixTemplateUpdateVariant(
-      $productId: ID!,
-      $variants: [ProductVariantsBulkInput!]!
-    ) {
-      productVariantsBulkUpdate(productId: $productId, variants: $variants) {
-        productVariants {
-          id
-          price
-          barcode
-          createdAt
-        }
-      }
-    }`,
-    {
-      variables: {
-        productId,
-        variants,
-      },
-    },
-  );
+  const response = await admin.graphql(GRAPHQL_UPDATE_PRODUCT_VARIANTS, {
+    variables: { productId: input.productId, variants: input.variants },
+  });
 
   const responseJson = await response.json();
-  const updatedVariants =
-    responseJson.data?.productVariantsBulkUpdate?.productVariants;
-
-  if (!updatedVariants) {
-    throw new Error("Failed to update product variant");
-  }
-
-  return updatedVariants;
+  return responseJson.data?.productVariantsBulkUpdate?.productVariants || null;
 };
 
-export const deleteProduct = async (request: Request, productId: string) => {
+export const deleteProduct = async (
+  request: Request,
+  input: { id: string },
+) => {
   const { admin } = await authenticate.admin(request);
 
-  const response = await admin.graphql(
-    `#graphql
-    mutation deleteProduct($id: ID!) {
-      productDelete(input: { id: $id }) {
-        deletedProductId
-        userErrors {
-          field
-          message
-        }
-      }
-    }`,
-    { variables: { id: productId } },
-  );
+  const response = await admin.graphql(GRAPHQL_DELETE_PRODUCT, {
+    variables: { id: input.id },
+  });
 
   const responseJson = await response.json();
-  const deletedProductId = responseJson.data?.productDelete?.deletedProductId;
-  const errors = responseJson.data?.productDelete?.userErrors;
 
+  // Handle errors properly
+  const errors = responseJson.data?.productDelete?.userErrors;
   if (errors?.length) {
     throw new Error(
       `Failed to delete product: ${errors.map((e: any) => e.message).join(", ")}`,
     );
   }
 
-  if (!deletedProductId) {
-    throw new Error("Product deletion failed");
-  }
-
-  return deletedProductId;
+  return responseJson.data?.productDelete?.deletedProductId || null;
 };
 
-export const getProductById = async (request: Request, productId: string) => {
+export const getProductById = async (
+  request: Request,
+  input: { id: string }, // ✅ Standardized input
+) => {
   const { admin } = await authenticate.admin(request);
 
-  const response = await admin.graphql(
-    `#graphql
-    query getProduct($id: ID!) {
-      product(id: $id) {
-        id
-        title
-        description
-        options {
-          name
-          values
-        }
-        variants(first: 10) {
-          edges {
-            node {
-              id
-              price
-              barcode
-              createdAt
-            }
-          }
-        }
-      }
-    }`,
-    { variables: { id: productId } },
-  );
+  const response = await admin.graphql(GRAPHQL_GET_PRODUCT_BY_ID, {
+    variables: { id: input.id },
+  });
 
   const responseJson = await response.json();
-  const product = responseJson.data?.product ?? null;
-  if (!product) {
-    throw new Error(`Product with id: ${productId} was not found`);
-  }
-
-  return product;
+  return responseJson.data?.product || null;
 };
 
 export const getProductMetafields = async (
   request: Request,
-  productId: string,
+  input: { productId: string },
 ) => {
   const { admin } = await authenticate.admin(request);
 
   const response = await admin.graphql(
     `#graphql
-    query getProductMetafields($productId: ID!) {
-      product(id: $productId) {
+    query GetProductMetafields($input: ID!) {
+      product(id: $input) {
         metafields(first: 10) {
           edges {
             node {
@@ -186,45 +115,34 @@ export const getProductMetafields = async (
         }
       }
     }`,
-    { variables: { productId } },
+    { variables: { input } },
   );
 
   const responseJson = await response.json();
-  const metafields =
+  return (
     responseJson.data?.product?.metafields?.edges.map(
       (edge: any) => edge.node,
-    ) ?? [];
-
-  return metafields;
+    ) || []
+  );
 };
 
 export const getProductOptions = async (
   request: Request,
-  productId: string,
+  input: { id: string },
 ) => {
   const { admin } = await authenticate.admin(request);
 
-  const response = await admin.graphql(
-    `#graphql
-    query getProductOptions($id: ID!) {
-      product(id: $id) {
-        options {
-          id
-          name
-          values
-        }
-      }
-    }`,
-    { variables: { id: productId } },
-  );
+  const response = await admin.graphql(GRAPHQL_GET_PRODUCT_OPTIONS, {
+    variables: { id: input.id },
+  });
 
   const responseJson = await response.json();
-  const options = responseJson.data?.product?.options ?? [];
 
-  // 🔴 Ensure returning the correct structure with componentOptionId
-  return options.map((option: any) => ({
-    componentOptionId: option.id, // ✅ Correct field name
-    name: option.name,
-    values: option.values,
-  }));
+  return (
+    responseJson.data?.product?.options?.map((option: any) => ({
+      componentOptionId: option.id,
+      name: option.name,
+      values: option.values,
+    })) || []
+  );
 };
