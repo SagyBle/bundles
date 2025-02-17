@@ -84,7 +84,7 @@ export const GRAPHQL_GET_PRODUCT_OPTIONS = `#graphql
 
 export const GRAPHQL_GET_PRODUCT_BY_ID = `#graphql
   query GetProduct($id: ID!) {
-    product(id: $id) {
+    product(id: $id) { 
       id
       title
       description
