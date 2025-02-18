@@ -14,12 +14,7 @@ import {
 } from "@shopify/polaris";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { authenticate } from "app/shopify.server";
-import {
-  // createProduct,
-  deleteProduct,
-  // updateProductVariants,
-  updateProduct,
-} from "app/services/product.service";
+
 import { formatGid } from "app/utils/gid.util";
 import { ShopifyResourceType } from "app/enums/gid.enums";
 
@@ -40,26 +35,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
 
   if (request.method === "PUT") {
-    try {
-      const formData = await request.formData();
-      const productId = formData.get("productId") as string;
-      const newTitle = formData.get("newTitle") as string;
-      if (!productId || !newTitle)
-        throw new Error("Product ID and new title are required.");
-
-      const updatedProduct = await updateProduct(request, {
-        id: productId,
-        title: newTitle,
-      });
-
-      return { success: true, updatedProduct };
-    } catch (error: any) {
-      console.error("Error updating product:", error);
-      return { success: false, error: error.message };
-    }
+    return ProductController.updateProduct(request);
   }
-
-  return { success: false, error: "Invalid method" };
 };
 
 export default function ProductsPage() {

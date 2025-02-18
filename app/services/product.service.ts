@@ -21,7 +21,7 @@ const createProduct = async (request: Request, input: { title: string }) => {
   return responseJson.data?.productCreate?.product || null;
 };
 
-export const updateProduct = async (
+const updateProduct = async (
   request: Request,
   input: { id: string; title: string },
 ) => {
@@ -121,4 +121,9 @@ export const getProductOptions = async (
   );
 };
 
-export default { createProduct, updateProductVariants, deleteProduct };
+export default {
+  createProduct,
+  updateProductVariants,
+  deleteProduct,
+  updateProduct,
+};

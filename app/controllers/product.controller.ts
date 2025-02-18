@@ -38,4 +38,26 @@ const deleteProduct = async (request: Request) => {
   }
 };
 
-export default { createProduct, deleteProduct };
+const updateProduct = async (request: Request) => {
+  try {
+    const formData = await request.formData();
+    const productId = formData.get("productId") as string;
+    const newTitle = formData.get("newTitle") as string;
+
+    if (!productId || !newTitle) {
+      throw new Error("Product ID and new title are required.");
+    }
+
+    const updatedProduct = await ProductService.updateProduct(request, {
+      id: productId,
+      title: newTitle,
+    });
+
+    return { success: true, updatedProduct };
+  } catch (error: any) {
+    console.error("Error updating product:", error);
+    return { success: false, error: error.message };
+  }
+};
+
+export default { createProduct, deleteProduct, updateProduct };
