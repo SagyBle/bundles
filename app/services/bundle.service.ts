@@ -10,7 +10,7 @@ import {
 } from "app/graphql/bundle.queries";
 import { retryWithDelay } from "app/utils/general.util";
 
-export const createBundle = async (
+const createBundle = async (
   // TODO: fix this types issue!
   request: any,
   input: BundleInput,
@@ -56,7 +56,7 @@ export const createBundle = async (
   }
 };
 
-export const updateBundleMetafieldProductsIds = async (
+const updateBundleMetafieldProductsIds = async (
   request: Request,
   productId: string,
   bundledProductIds: string[],
@@ -104,7 +104,7 @@ export const updateBundleMetafieldProductsIds = async (
   }
 };
 
-export const getProductIdFromBundleOperation = async (
+const getProductIdFromBundleOperation = async (
   request: Request,
   bundleOperationId: string,
 ): Promise<string | null> => {
@@ -118,4 +118,10 @@ export const getProductIdFromBundleOperation = async (
     const responseJson = await response.json();
     return responseJson.data?.productOperation?.product?.id || null;
   });
+};
+
+export default {
+  createBundle,
+  updateBundleMetafieldProductsIds,
+  getProductIdFromBundleOperation,
 };

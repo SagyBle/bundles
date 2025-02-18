@@ -1,9 +1,10 @@
 import { ShopifyResourceType } from "app/enums/gid.enums";
-import { createBundle } from "app/services/bundle.service";
+
+import BundleService from "app/services/bundle.service";
 import { getProductOptions } from "app/services/product.service";
 import { formatGid } from "app/utils/gid.util";
 
-const actionCreateBundle = async (request: Request) => {
+const createBundle = async (request: Request) => {
   const formData = await request.formData();
   const firstProductId = formData.get("firstProductId") as string;
   const secondProductId = formData.get("secondProductId") as string;
@@ -55,7 +56,7 @@ const actionCreateBundle = async (request: Request) => {
     },
   };
 
-  const bundleCreated = await createBundle(request, bundleInput);
+  const bundleCreated = await BundleService.createBundle(request, bundleInput);
 
   return {
     success: true,
@@ -63,4 +64,4 @@ const actionCreateBundle = async (request: Request) => {
   };
 };
 
-export default { actionCreateBundle };
+export default { createBundle };
