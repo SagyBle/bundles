@@ -105,3 +105,21 @@ export const GRAPHQL_GET_PRODUCT_BY_ID = `#graphql
     }
   }
 `;
+
+export const GRAPHQL_GET_PRODUCT_METAFIELDS = `#graphql
+    query GetProductMetafields($input: ID!) {
+      product(id: $input) {
+        metafields(first: 10) {
+          edges {
+            node {
+              id
+              namespace
+              key
+              value
+              type
+              description
+            }
+          }
+        }
+      }
+    }`;

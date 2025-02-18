@@ -2,19 +2,17 @@ import {
   GRAPHQL_CREATE_PRODUCT,
   GRAPHQL_DELETE_PRODUCT,
   GRAPHQL_GET_PRODUCT_BY_ID,
+  GRAPHQL_GET_PRODUCT_METAFIELDS,
   GRAPHQL_GET_PRODUCT_OPTIONS,
   GRAPHQL_UPDATE_PRODUCT,
   GRAPHQL_UPDATE_PRODUCT_VARIANTS,
 } from "app/graphql/product.queries";
 import { authenticate } from "app/shopify.server";
-import {
-  ProductDataInput,
-  ProductVariantUpdateInput,
-} from "app/types/product.types";
+import { ProductVariantUpdateInput } from "app/types/product.types";
 
 export const createProduct = async (
   request: Request,
-  input: ProductDataInput,
+  input: { title: string },
 ) => {
   const { admin } = await authenticate.admin(request);
 
@@ -66,7 +64,6 @@ export const deleteProduct = async (
 
   const responseJson = await response.json();
 
-  // Handle errors properly
   const errors = responseJson.data?.productDelete?.userErrors;
   if (errors?.length) {
     throw new Error(
@@ -97,26 +94,9 @@ export const getProductMetafields = async (
 ) => {
   const { admin } = await authenticate.admin(request);
 
-  const response = await admin.graphql(
-    `#graphql
-    query GetProductMetafields($input: ID!) {
-      product(id: $input) {
-        metafields(first: 10) {
-          edges {
-            node {
-              id
-              namespace
-              key
-              value
-              type
-              description
-            }
-          }
-        }
-      }
-    }`,
-    { variables: { input } },
-  );
+  const response = await admin.graphql(GRAPHQL_GET_PRODUCT_METAFIELDS, {
+    variables: { input },
+  });
 
   const responseJson = await response.json();
   return (

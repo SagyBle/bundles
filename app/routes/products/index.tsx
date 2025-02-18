@@ -29,8 +29,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  console.log("Received request method:", request.method);
-
   if (request.method === "POST") {
     try {
       const product = await createProduct(request, {
@@ -68,14 +66,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   if (request.method === "PUT") {
     try {
-      console.log("sagy31");
-
       const formData = await request.formData();
       const productId = formData.get("productId") as string;
       const newTitle = formData.get("newTitle") as string;
       if (!productId || !newTitle)
         throw new Error("Product ID and new title are required.");
-      console.log({ productId, newTitle });
 
       const updatedProduct = await updateProduct(request, {
         id: productId,
@@ -95,7 +90,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 export default function ProductsPage() {
   const [inputProductId, setInputProductId] = useState("");
   const [newTitle, setNewTitle] = useState("");
-  const fetcher = useFetcher<typeof action>();
+  const fetcher = useFetcher<any>();
   const shopify = useAppBridge();
 
   useEffect(() => {

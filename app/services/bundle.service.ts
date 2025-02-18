@@ -72,7 +72,6 @@ export const updateBundleMetafield = async (
   bundledProductIds: string[],
 ) => {
   const { admin } = await authenticate.admin(request);
-  console.log("sagy91", "reached here");
 
   // const formattedProductId = `gid://shopify/Product/${productId}`;
   const formattedProductId = formatGid(productId, ShopifyResourceType.Product);
@@ -144,7 +143,7 @@ export const getProductIdFromBundleOperation = async (
 
   let attempts = 0;
   // TODO: think about it!! maybe it's not the right way to do it
-  const maxAttempts = 10; // Retry max 5 times
+  const maxAttempts = 10;
   const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
   while (attempts < maxAttempts) {
