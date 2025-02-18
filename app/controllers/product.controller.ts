@@ -21,4 +21,21 @@ const createProduct = async (request: Request) => {
   }
 };
 
-export default { createProduct };
+const deleteProduct = async (request: Request) => {
+  try {
+    const formData = await request.formData();
+    const productId = formData.get("productId") as string;
+    if (!productId) throw new Error("Product ID is required to delete.");
+
+    const deletedProductId = await ProductService.deleteProduct(request, {
+      id: productId,
+    });
+
+    return { success: true, deletedProductId };
+  } catch (error: any) {
+    console.error("Error deleting product:", error);
+    return { success: false, error: error.message };
+  }
+};
+
+export default { createProduct, deleteProduct };

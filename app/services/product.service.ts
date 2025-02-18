@@ -49,10 +49,7 @@ const updateProductVariants = async (
   return responseJson.data?.productVariantsBulkUpdate?.productVariants || null;
 };
 
-export const deleteProduct = async (
-  request: Request,
-  input: { id: string },
-) => {
+const deleteProduct = async (request: Request, input: { id: string }) => {
   const { admin } = await authenticate.admin(request);
 
   const response = await admin.graphql(GRAPHQL_DELETE_PRODUCT, {
@@ -124,4 +121,4 @@ export const getProductOptions = async (
   );
 };
 
-export default { createProduct, updateProductVariants };
+export default { createProduct, updateProductVariants, deleteProduct };
