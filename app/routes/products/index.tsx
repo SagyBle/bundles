@@ -15,13 +15,15 @@ import {
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { authenticate } from "app/shopify.server";
 import {
-  createProduct,
+  // createProduct,
   deleteProduct,
-  updateProductVariants,
+  // updateProductVariants,
   updateProduct,
 } from "app/services/product.service";
 import { formatGid } from "app/utils/gid.util";
 import { ShopifyResourceType } from "app/enums/gid.enums";
+
+import ProductController from "app/controllers/product.controller";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   await authenticate.admin(request);
@@ -30,24 +32,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   if (request.method === "POST") {
-    try {
-      const product = await createProduct(request, {
-        title: `just created: ${new Date().toLocaleString()}`,
-      });
-
-      const variantId = product.variants.edges[0]?.node?.id;
-      if (!variantId) throw new Error("Failed to retrieve product variant ID.");
-
-      const updatedVariant = await updateProductVariants(request, {
-        productId: product.id,
-        variants: [{ id: variantId, price: "100.00" }],
-      });
-
-      return { success: true, product, variant: updatedVariant };
-    } catch (error: any) {
-      console.error("Error creating product or updating variant:", error);
-      return { success: false, error: error.message };
-    }
+    return ProductController.createProduct(request);
   }
 
   if (request.method === "DELETE") {

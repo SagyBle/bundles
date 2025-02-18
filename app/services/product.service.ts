@@ -10,10 +10,7 @@ import {
 import { authenticate } from "app/shopify.server";
 import { ProductVariantUpdateInput } from "app/types/product.types";
 
-export const createProduct = async (
-  request: Request,
-  input: { title: string },
-) => {
+const createProduct = async (request: Request, input: { title: string }) => {
   const { admin } = await authenticate.admin(request);
 
   const response = await admin.graphql(GRAPHQL_CREATE_PRODUCT, {
@@ -38,7 +35,7 @@ export const updateProduct = async (
   return responseJson.data?.productUpdate?.product || null;
 };
 
-export const updateProductVariants = async (
+const updateProductVariants = async (
   request: Request,
   input: { productId: string; variants: ProductVariantUpdateInput[] },
 ) => {
@@ -126,3 +123,5 @@ export const getProductOptions = async (
     })) || []
   );
 };
+
+export default { createProduct, updateProductVariants };
