@@ -1,34 +1,26 @@
-import { CreateBundleInput } from "app/types/budnle.types";
 import { authenticate } from "../shopify.server";
 import { extractProductIds, flattenProductIds } from "app/utils/bundle.util";
 import { formatGid } from "app/utils/gid.util";
 import { ShopifyResourceType } from "app/enums/gid.enums";
+import { BundleInput } from "app/types/budnle.types";
+import {
+  GRAPHQL_PRODUCT_BUNDLE_CREATE,
+  GRAPHQL_PRODUCT_BUNDLE_OPERATION,
+  GRAPHQL_PRODUCT_UPDATE_METAFIELDS,
+} from "app/graphql/bundle.queries";
+import { retryWithDelay } from "app/utils/general.util";
 
 export const createBundle = async (
   // TODO: fix this types issue!
   request: any,
-  input: any,
+  input: BundleInput,
 ) => {
   const { admin } = await authenticate.admin(request);
 
   try {
-    const response = await admin.graphql(
-      `#graphql
-      mutation ProductBundleCreate($input: ProductBundleCreateInput!) {
-        productBundleCreate(input: $input) {
-            productBundleOperation {
-                id
-                status
-        }
-        userErrors {
-            message
-            field
-        }
-    }
-    }
-      `,
-      { variables: input },
-    );
+    const response = await admin.graphql(GRAPHQL_PRODUCT_BUNDLE_CREATE, {
+      variables: input,
+    });
 
     const responseJson = await response.json();
     const bundleOperationId =
@@ -37,19 +29,17 @@ export const createBundle = async (
       request,
       bundleOperationId,
     );
-    // TODO: how to make sure that i get the bundleProductId
-    // and if not, what is the best thing to do here?
+
     if (!bundleProductId) bundleProductId = "";
 
     const userErrors = responseJson.data?.bundleCreate?.userErrors;
 
     const productsIds = extractProductIds(input);
-    console.log("sagy200", { productsIds });
 
     // Update bundle product metafield.
-    const res = await updateBundleMetafield(
+    const res = await updateBundleMetafieldProductsIds(
       request,
-      bundleProductId + "a",
+      bundleProductId,
       productsIds,
     );
 
@@ -66,40 +56,17 @@ export const createBundle = async (
   }
 };
 
-export const updateBundleMetafield = async (
+export const updateBundleMetafieldProductsIds = async (
   request: Request,
   productId: string,
   bundledProductIds: string[],
 ) => {
   const { admin } = await authenticate.admin(request);
 
-  // const formattedProductId = `gid://shopify/Product/${productId}`;
   const formattedProductId = formatGid(productId, ShopifyResourceType.Product);
   const formattedBundledProducts = bundledProductIds
     .map((id) => formatGid(id, ShopifyResourceType.Product))
     .join(", ");
-
-  const mutation = `#graphql
-    mutation ProductUpdate($input: ProductInput!) {
-      productUpdate(input: $input) {
-        product {
-          metafields(first: 10) {
-            edges {
-              node {
-                namespace
-                key
-                value
-              }
-            }
-          }
-        }
-        userErrors {
-          field
-          message
-        }
-      }
-    }
-  `;
 
   const variables = {
     input: {
@@ -116,7 +83,9 @@ export const updateBundleMetafield = async (
   };
 
   try {
-    const response = await admin.graphql(mutation, { variables });
+    const response = await admin.graphql(GRAPHQL_PRODUCT_UPDATE_METAFIELDS, {
+      variables,
+    });
     const responseJson = await response.json();
 
     const userErrors = responseJson.data?.productUpdate?.userErrors;
@@ -141,50 +110,12 @@ export const getProductIdFromBundleOperation = async (
 ): Promise<string | null> => {
   const { admin } = await authenticate.admin(request);
 
-  let attempts = 0;
-  // TODO: think about it!! maybe it's not the right way to do it
-  const maxAttempts = 10;
-  const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
-
-  while (attempts < maxAttempts) {
-    const response = await admin.graphql(
-      `#graphql
-      query productBundleOperation($id: ID!) {
-        productOperation(id: $id) {
-          ... on ProductBundleOperation {
-            id
-            status
-            product {
-              id
-            }
-            userErrors {
-              field
-              message
-              code
-            }
-          }
-        }
-      }`,
-      { variables: { id: bundleOperationId } },
-    );
+  return retryWithDelay(async () => {
+    const response = await admin.graphql(GRAPHQL_PRODUCT_BUNDLE_OPERATION, {
+      variables: { id: bundleOperationId },
+    });
 
     const responseJson = await response.json();
-    console.log(
-      "sagy100 Response JSON:",
-      JSON.stringify(responseJson, null, 2),
-    );
-
-    const product = responseJson.data?.productOperation?.product;
-
-    if (product) {
-      return product.id;
-    }
-
-    attempts += 1;
-    console.log(`Retrying... (${attempts}/${maxAttempts})`);
-    await delay(2000);
-  }
-
-  console.error("❌ Product creation timed out.");
-  return null;
+    return responseJson.data?.productOperation?.product?.id || null;
+  });
 };

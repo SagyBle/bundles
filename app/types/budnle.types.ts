@@ -4,13 +4,21 @@ export interface BundleOptionSelection {
   values: string[];
 }
 
-export interface BundleComponent {
-  quantity: number;
-  productId: string;
-  optionSelections: BundleOptionSelection[];
+interface ProductBundleOptionSelection {
+  componentOptionId: string;
+  name: string;
+  values: string[];
 }
 
-export interface CreateBundleInput {
-  title: string;
-  components: BundleComponent[];
+interface ProductBundleComponent {
+  quantity: number;
+  productId: string;
+  optionSelections: ProductBundleOptionSelection[];
+}
+
+export interface BundleInput {
+  input: {
+    title: string;
+    components: ProductBundleComponent[];
+  };
 }
