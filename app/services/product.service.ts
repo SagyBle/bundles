@@ -23,7 +23,7 @@ const createProduct = async (request: Request, input: { title: string }) => {
 
 const updateProduct = async (
   request: Request,
-  input: { id: string; title: string },
+  input: { id: string; title?: string; status?: "ACTIVE" | "DRAFT" },
 ) => {
   const { admin } = await authenticate.admin(request);
 

@@ -60,4 +60,34 @@ const updateProduct = async (request: Request) => {
   }
 };
 
-export default { createProduct, deleteProduct, updateProduct };
+const updateProductStatus = async (request: Request) => {
+  try {
+    const formData = await request.formData();
+    const productId = formData.get("productId") as string;
+    const status = formData.get("status") as string;
+
+    // ✅ Type Guard: Ensure `status` is either "ACTIVE" or "DRAFT"
+    if (!productId || !["ACTIVE", "DRAFT"].includes(status)) {
+      throw new Error(
+        "Product ID and valid status (ACTIVE or DRAFT) are required.",
+      );
+    }
+
+    const updatedProduct = await ProductService.updateProduct(request, {
+      id: productId,
+      status: status as "ACTIVE" | "DRAFT",
+    });
+
+    return { success: true, updatedProduct };
+  } catch (error: any) {
+    console.error("Error updating product:", error);
+    return { success: false, error: error.message };
+  }
+};
+
+export default {
+  createProduct,
+  deleteProduct,
+  updateProduct,
+  updateProductStatus,
+};

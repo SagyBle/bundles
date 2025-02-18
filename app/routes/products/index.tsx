@@ -26,17 +26,19 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
+  const url = new URL(request.url);
+  const actionType = url.searchParams.get("action");
   if (request.method === "POST") {
     return ProductController.createProduct(request);
-  }
-
-  if (request.method === "DELETE") {
+  } else if (request.method === "DELETE") {
     return ProductController.deleteProduct(request);
-  }
-
-  if (request.method === "PUT") {
+  } else if (request.method === "PUT" && actionType === "status") {
+    return ProductController.updateProductStatus(request);
+  } else if (request.method === "PUT") {
     return ProductController.updateProduct(request);
   }
+
+  return { success: false, error: "Invalid request method" };
 };
 
 export default function ProductsPage() {
@@ -83,6 +85,20 @@ export default function ProductsPage() {
     fetcher.submit(formData, { method: "PUT", action: "/products" });
   };
 
+  const handleUpdateProductStatus = () => {
+    if (!inputProductId.trim()) return;
+    const formData = new FormData();
+    formData.append(
+      "productId",
+      formatGid(inputProductId, ShopifyResourceType.Product),
+    );
+    formData.append("status", "ACTIVE");
+    fetcher.submit(formData, {
+      method: "PUT",
+      action: "/products?action=status",
+    });
+  };
+
   return (
     <Page>
       <BlockStack gap="500">
@@ -120,6 +136,9 @@ export default function ProductsPage() {
                   />
                   <Button onClick={handleUpdateProduct}>
                     Update Product Title
+                  </Button>
+                  <Button onClick={handleUpdateProductStatus}>
+                    Update Product Status to ACTIVE
                   </Button>
                 </InlineStack>
                 {fetcher.data?.product && (
