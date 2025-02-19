@@ -1,0 +1,36 @@
+<p>Sagy Blecher</p>
+
+<!-- ✅ Checkout Button -->
+<button id="checkout-button" onclick="testProxy()" style="
+  padding: 10px 20px;
+  background-color: #008060;
+  color: white;
+  border: none;
+  cursor: pointer;
+  margin-top: 10px;
+  font-size: 16px;
+">
+  Checkout
+</button>
+
+<!-- ✅ JavaScript to Print "Hello World" on Click -->
+<script>
+  const testProxy = () => {
+    console.log("Hello World! 🚀");
+  }
+
+// ✅ Test the function
+
+</script>
+
+{% schema %}
+{
+  "name": "Checkout Sagy",
+  "target": "section",
+  "settings": [
+    { "type": "product", "id": "product", "label": "Product", "autofill": true },
+    { "type": "color", "id": "colour", "label": "Star Colour", "default": "#ff0000" }
+  ]
+}
+{% endschema %}
+
