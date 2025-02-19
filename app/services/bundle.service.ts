@@ -9,6 +9,7 @@ import {
   GRAPHQL_PRODUCT_UPDATE_METAFIELDS,
 } from "app/graphql/bundle.queries";
 import { retryWithDelay } from "app/utils/general.util";
+import productService from "./product.service";
 
 const createBundle = async (
   // TODO: fix this types issue!
@@ -48,6 +49,11 @@ const createBundle = async (
         `Bundle creation failed: ${userErrors.map((e: any) => e.message).join(", ")}`,
       );
     }
+
+    const updatedBundleStatus = await productService.updateProduct(request, {
+      id: bundleProductId,
+      status: "ACTIVE",
+    });
 
     return bundleProductId;
   } catch (error) {
