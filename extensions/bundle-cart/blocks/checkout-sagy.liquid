@@ -1,4 +1,4 @@
-<p>Sagy Blecher</p>
+<p>Sagy Blechersss</p>
 
 <!-- ✅ Checkout Button -->
 <button id="checkout-button" onclick="testProxy()" style="
@@ -13,14 +13,40 @@
   Checkout
 </button>
 
-<!-- ✅ JavaScript to Print "Hello World" on Click -->
+<!-- ✅ JavaScript for CORS Fixed Requests -->
 <script>
-  const testProxy = () => {
-    console.log("Hello World! 🚀");
-  }
+  const testProxy = async () => {
+    console.log("🚀 Sending request...");
 
-// ✅ Test the function
+    const requestBody = {
+      message: "Hello from Shopify Extension!",
+      user: {
+        id: "12345",
+        name: "Sagy Blecher",
+      }
+    };
 
+    try {
+      const response = await fetch("https://oldest-honey-dedicated-protect.trycloudflare.com/test", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Request failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("✅ Response:", data);
+      alert(`✅ Success: ${data.message}`);
+    } catch (error) {
+      console.error("❌ Fetch Error:", error);
+      alert(`❌ Error: ${error.message}`);
+    }
+  };
 </script>
 
 {% schema %}
@@ -33,4 +59,3 @@
   ]
 }
 {% endschema %}
-

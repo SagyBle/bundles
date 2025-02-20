@@ -5,7 +5,6 @@ const createProduct = async (request: Request) => {
     const product = await ProductService.createProduct(request, {
       title: `just created: ${new Date().toLocaleString()}`,
     });
-
     const variantId = product.variants.edges[0]?.node?.id;
     if (!variantId) throw new Error("Failed to retrieve product variant ID.");
 

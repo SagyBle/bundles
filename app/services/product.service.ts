@@ -11,6 +11,7 @@ import { authenticate } from "app/shopify.server";
 import { ProductVariantUpdateInput } from "app/types/product.types";
 
 const createProduct = async (request: Request, input: { title: string }) => {
+  console.log("sagy700");
   const { admin } = await authenticate.admin(request);
 
   const response = await admin.graphql(GRAPHQL_CREATE_PRODUCT, {

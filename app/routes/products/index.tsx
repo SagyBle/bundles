@@ -50,7 +50,7 @@ export default function ProductsPage() {
   useEffect(() => {
     if (fetcher.data?.product) {
       shopify.toast.show(
-        `Product created with id: ${fetcher.data.product.id.replace("gid://shopify/Product/", "")}`,
+        `Product created with id: ${formatGid(fetcher.data.product.id, ShopifyResourceType.Product)}`,
       );
     }
     if (fetcher.data?.deletedProductId) {
