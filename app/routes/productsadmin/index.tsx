@@ -61,7 +61,7 @@ export default function ProductsPage() {
   }, [fetcher.data, shopify]);
 
   const handleGenerateProduct = () => {
-    fetcher.submit({}, { method: "POST", action: "/products" });
+    fetcher.submit({}, { method: "POST", action: "/productsadmin" });
   };
 
   const handleDeleteProduct = () => {
@@ -71,7 +71,7 @@ export default function ProductsPage() {
       "productId",
       formatGid(inputProductId, ShopifyResourceType.Product),
     );
-    fetcher.submit(formData, { method: "DELETE", action: "/products" });
+    fetcher.submit(formData, { method: "DELETE", action: "/productsadmin" });
   };
 
   const handleUpdateProduct = () => {
@@ -82,7 +82,7 @@ export default function ProductsPage() {
       formatGid(inputProductId, ShopifyResourceType.Product),
     );
     formData.append("newTitle", newTitle);
-    fetcher.submit(formData, { method: "PUT", action: "/products" });
+    fetcher.submit(formData, { method: "PUT", action: "/productsadmin" });
   };
 
   const handleUpdateProductStatus = () => {
@@ -95,7 +95,7 @@ export default function ProductsPage() {
     formData.append("status", "ACTIVE");
     fetcher.submit(formData, {
       method: "PUT",
-      action: "/products?action=status",
+      action: "/productsadmin?action=status",
     });
   };
 

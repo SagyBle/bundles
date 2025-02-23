@@ -1,6 +1,6 @@
 import { Page } from "@shopify/polaris";
 import BundlesPage from "./bundles";
-import ProductsPage from "./products";
+import ProductsPage from "./productsadmin";
 import ApiTest from "app/components/ApiTest";
 import RingPage from "./ring";
 
