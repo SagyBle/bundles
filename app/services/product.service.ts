@@ -13,14 +13,77 @@ import { ProductVariantUpdateInput } from "app/types/product.types";
 const createProduct = async (request: Request, input: { title: string }) => {
   console.log("sagy700");
   const { admin } = await authenticate.admin(request);
+  // const { session } = await authenticate.public.appProxy(request);
+
+  // console.log("sagy701", session);
 
   const response = await admin.graphql(GRAPHQL_CREATE_PRODUCT, {
     variables: { input },
   });
+
+  // const response = await session.graphql(GRAPHQL_CREATE_PRODUCT, {
+  //   variables: { input },
+  // });
   const responseJson = await response.json();
 
   return responseJson.data?.productCreate?.product || null;
 };
+
+// const createProduct = async (request: Request, input: { title: string }) => {
+//   console.log("sagy700");
+
+//   // ✅ Authenticate request using App Proxy
+//   const { session }: any = await authenticate.public.appProxy(request);
+//   console.log("sagy701", session);
+//   console.log("sagy701", session.accessToken);
+
+//   // ✅ Define GraphQL query
+//   const GRAPHQL_CREATE_PRODUCT = `
+//     mutation prsoductCreate($input: ProductInput!) {
+//       productCreate(input: $input) {
+//         product {
+//           id
+//           title
+//         }
+//         userErrors {
+//           field
+//           message
+//         }
+//       }
+//     }
+//   `;
+
+//   try {
+//     // ✅ Send the request manually using fetch
+//     const response = await fetch(
+//       `https://${session.shop}/admin/api/2023-10/graphql.json`,
+//       {
+//         method: "POST",
+//         headers: {
+//           "Content-Type": "application/json",
+//           "X-Shopify-Access-Token": session.accessToken || "", // ✅ Use session token
+//         },
+//         body: JSON.stringify({
+//           query: GRAPHQL_CREATE_PRODUCT,
+//           variables: { input },
+//         }),
+//       },
+//     );
+
+//     // ✅ Parse the response
+//     const responseJson = await response.json();
+//     console.log("sagy702 Response:", responseJson);
+
+//     if (responseJson.errors) {
+//       throw new Error(`GraphQL Error: ${JSON.stringify(responseJson.errors)}`);
+//     }
+
+//     return responseJson.data?.productCreate?.product || null;
+//   } catch (error) {
+//     console.error("❌ Error creating product:", error);
+//     return null;
+//   }
+// };
 
 const updateProduct = async (
   request: Request,

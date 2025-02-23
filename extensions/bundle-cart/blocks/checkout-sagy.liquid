@@ -1,4 +1,4 @@
-<p>Sagy Blechersss</p>
+<p>Sagy Blechessss</p>
 
 <!-- ✅ Checkout Button -->
 <button id="checkout-button" onclick="testProxy()" style="
@@ -10,11 +10,58 @@
   margin-top: 10px;
   font-size: 16px;
 ">
-  Checkout
+  Test
+  
 </button>
+<button id="checkout-button" onclick="createProductProxy()" style="
+  padding: 10px 20px;
+  background-color: #008060;
+  color: white;
+  border: none;
+  cursor: pointer;
+  margin-top: 10px;
+  font-size: 16px;
+">
+  Create Product
+  
+</button>
+
 
 <!-- ✅ JavaScript for CORS Fixed Requests -->
 <script>
+  const createProductProxy = async () => {
+    console.log("🚀 Sending request...");
+
+    const requestBody = {
+      message: "Hello from Shopify Extension!",
+      user: {
+        id: "12345",
+        name: "Sagy Blecher",
+      }
+    };
+
+    try {
+      const response = await fetch("https://sagy-test-academy.myshopify.com/apps/checkout-proxy/products", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          'Access-Control-Allow-Origin': '*'
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Request failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("✅ Response:", data);
+      alert(`✅ Success: ${data.message}`);
+    } catch (error) {
+      console.error("❌ Fetch Error:", error);
+      alert(`❌ Error: ${error.message}`);
+    }
+  };
   const testProxy = async () => {
     console.log("🚀 Sending request...");
 
@@ -27,7 +74,7 @@
     };
 
     try {
-      const response = await fetch("https://oldest-honey-dedicated-protect.trycloudflare.com/test", {
+      const response = await fetch("https://sagy-test-academy.myshopify.com/apps/checkout-proxy/test", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -47,6 +94,7 @@
       alert(`❌ Error: ${error.message}`);
     }
   };
+
 </script>
 
 {% schema %}
