@@ -9,66 +9,36 @@ import {
 } from "app/graphql/product.queries";
 import { authenticate } from "app/shopify.server";
 import { ProductVariantUpdateInput } from "app/types/product.types";
+import { AdminShopifyService } from "./api/adminShopify.api.service";
+import { checkRequestType } from "app/utils/auth.util";
+import { SessionShopifyService } from "./api/sessionShopify.api.service";
 
 const createProduct = async (request: Request, input: { title: string }) => {
   console.log("sagy700");
 
   try {
-    // Authenticate the request
-    const { admin } = await authenticate.admin(request);
+    const { isAdmin, isSession } = await checkRequestType(request);
 
-    if (admin) {
-      // Shopify Admin API request
-      const response = await admin.graphql(GRAPHQL_CREATE_PRODUCT, {
-        variables: { input },
-      });
-      const responseJson = await response.json();
-
-      return responseJson.data?.productCreate?.product || null;
-    }
-    const { session } = await authenticate.public.appProxy(request);
-    if (session) {
-      const CREATE_PRODUCT = `
-          mutation prsoductCreate($input: ProductInput!) {
-            productCreate(input: $input) {
-              product {
-                id
-                title
-              }
-              userErrors {
-                field
-                message
-              }
-            }
-          }
-        `;
-
-      const response = await fetch(
-        `https://${session.shop}/admin/api/2023-10/graphql.json`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Shopify-Access-Token": session.accessToken || "",
-          },
-          body: JSON.stringify({
-            query: CREATE_PRODUCT,
-            variables: { input },
-          }),
-        },
+    if (isAdmin) {
+      const data: any = await AdminShopifyService.executeGraphQL(
+        request,
+        GRAPHQL_CREATE_PRODUCT,
+        { input },
       );
 
-      const responseJson = await response.json();
-
-      if (responseJson.errors) {
-        console.error("GraphQL Errors:", responseJson.errors);
-        return null;
+      if (data?.productCreate?.product) {
+        return data.productCreate.product;
       }
+    } else if (isSession) {
+      const sessionData: any = await SessionShopifyService.executeGraphQL(
+        request,
+        GRAPHQL_CREATE_PRODUCT,
+        { input },
+      );
 
-      return responseJson.data?.productCreate?.product || null;
-    } else {
-      throw new Error("Unauthorized: No valid session.");
+      return sessionData?.productCreate?.product || null;
     }
+    return null;
   } catch (error) {
     console.error("Error creating product:", error);
     return null;

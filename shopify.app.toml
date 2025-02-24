@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "d7e54d6cd8ebf591a5b009889b4a4fc4"
-application_url = "https://harassment-troubleshooting-prize-kai.trycloudflare.com"
+application_url = "https://door-tiny-facilities-extraordinary.trycloudflare.com"
 embedded = true
 name = "bundles"
 handle = "bundles-88"
@@ -23,9 +23,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://harassment-troubleshooting-prize-kai.trycloudflare.com/auth/callback",
-  "https://harassment-troubleshooting-prize-kai.trycloudflare.com/auth/shopify/callback",
-  "https://harassment-troubleshooting-prize-kai.trycloudflare.com/api/auth/callback"
+  "https://door-tiny-facilities-extraordinary.trycloudflare.com/auth/callback",
+  "https://door-tiny-facilities-extraordinary.trycloudflare.com/auth/shopify/callback",
+  "https://door-tiny-facilities-extraordinary.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

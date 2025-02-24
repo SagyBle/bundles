@@ -99,6 +99,14 @@ export default function ProductsPage() {
     });
   };
 
+  const handleTest = () => {
+    console.log("test");
+    fetcher.submit(null, {
+      method: "POST",
+      action: "/test",
+    });
+  };
+
   return (
     <Page>
       <BlockStack gap="500">
@@ -140,6 +148,7 @@ export default function ProductsPage() {
                   <Button onClick={handleUpdateProductStatus}>
                     Update Product Status to ACTIVE
                   </Button>
+                  <Button onClick={handleTest}>Test</Button>
                 </InlineStack>
                 {fetcher.data?.product && (
                   <Box

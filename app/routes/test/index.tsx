@@ -1,6 +1,7 @@
 import { json } from "@remix-run/node";
 import { cors } from "remix-utils/cors";
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "@remix-run/node";
+import { checkRequestType } from "app/utils/auth.util";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   // Handle preflight OPTIONS request
@@ -26,6 +27,14 @@ export async function action({ request }: ActionFunctionArgs) {
     const response = json({ status: 200 });
     return await cors(request, response);
   }
+  const requestObject = await checkRequestType(request);
+  console.log(
+    "sagy400",
+    "requestObject.isAdmin",
+    requestObject.isAdmin,
+    "requestObject.isSession",
+    requestObject.isSession,
+  );
 
   try {
     const data = await request.json();
