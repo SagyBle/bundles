@@ -1,7 +1,7 @@
 <p>Sagy Blechessss</p>
 
-<!-- ✅ Checkout Button -->
-<button id="checkout-button" onclick="testProxy()" style="
+<!-- ✅ Checkout Buttons -->
+<button id="checkout-button1" onclick="testProxy()" style="
   padding: 10px 20px;
   background-color: #008060;
   color: white;
@@ -11,9 +11,9 @@
   font-size: 16px;
 ">
   Test
-  
 </button>
-<button id="checkout-button" onclick="createProductProxy()" style="
+
+<button id="checkout-button2" onclick="createProductProxy()" style="
   padding: 10px 20px;
   background-color: #008060;
   color: white;
@@ -23,9 +23,9 @@
   font-size: 16px;
 ">
   Create Product
-  
 </button>
-<button id="checkout-button" onclick="createBundle()" style="
+
+<button id="checkout-button3" onclick="createBundle()" style="
   padding: 10px 20px;
   background-color: #008060;
   color: white;
@@ -35,11 +35,22 @@
   font-size: 16px;
 ">
   Create Bundle
-  
 </button>
 
+<!-- ✅ Add Bundle to Cart Button -->
+<button id="checkout-button4" onclick="addBundleToCart()" style="
+  padding: 10px 20px;
+  background-color: #008060;
+  color: white;
+  border: none;
+  cursor: pointer;
+  margin-top: 10px;
+  font-size: 16px;
+">
+  Add Bundle to Cart
+</button>
 
-<!-- ✅ JavaScript for CORS Fixed Requests -->
+<!-- ✅ JavaScript for Storefront Actions -->
 <script>
   const createProductProxy = async () => {
     console.log("🚀 Sending request...");
@@ -74,6 +85,7 @@
       alert(`❌ Error: ${error.message}`);
     }
   };
+
   const testProxy = async () => {
     console.log("🚀 Sending request...");
 
@@ -106,42 +118,87 @@
       alert(`❌ Error: ${error.message}`);
     }
   };
+
   const createBundle = async () => {
     console.log("🚀 Sending create bundle request...");
 
-    // const requestBody = {
-    //   message: "Hello from Shopify Extension!",
-    //   user: {
-    //     id: "12345",
-    //     name: "Sagy Blecher",
-    //   }
-    // };
-
     try {
-      const response = await fetch("https://sagy-test-academy.myshopify.com/apps/checkout-proxy/bundlespublic", {
+      // First request to /bundlespublic
+      const responsePublic = await fetch("https://sagy-test-academy.myshopify.com/apps/checkout-proxy/bundles", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          'Access-Control-Allow-Origin': '*'
+          "Access-Control-Allow-Origin": "*",
         },
         body: JSON.stringify({}),
       });
 
-      if (!response.ok) {
-        throw new Error(`Request failed: ${response.status}`);
+      if (!responsePublic.ok) {
+        throw new Error(`Public request failed: ${responsePublic.status}`);
       }
 
-      const data = await response.json();
-      console.log("✅ Response:", data);
-      alert(`✅ Success: ${data.message}`);
+      const dataPublic = await responsePublic.json();
+      console.log("✅ Response from /bundlespublic:", dataPublic);
+
+      // Second request to /bundles
+      const responseBundle = await fetch("https://sagy-test-academy.myshopify.com/apps/checkout-proxy/bundles", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+        body: JSON.stringify({}),
+      });
+
+      if (!responseBundle.ok) {
+        throw new Error(`Bundle request failed: ${responseBundle.status}`);
+      }
+
+      const dataBundle = await responseBundle.json();
+      console.log("✅ Response from /bundles:", dataBundle);
+
+      alert(`✅ Success: ${dataPublic.message}, ${dataBundle.message}`);
     } catch (error) {
       console.error("❌ Fetch Error:", error);
       alert(`❌ Error: ${error.message}`);
     }
   };
-  
-  
 
+  // ✅ Add Product to Cart (Mock Bundle ID)
+  const addBundleToCart = async () => {
+    console.log("🚀 Adding bundle to cart...");
+
+    // Mock Bundle Product ID (Replace with actual ID from bundle creation response)
+    // NOTICE: Put numeric variant id number
+    const variantId = "50613593375007"; 
+
+    try {
+      const response = await fetch("/cart/add.js", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: variantId, // Shopify Variant ID
+          quantity: 1,
+        }),
+      });
+
+      console.log("sagy17", response);
+      
+
+      if (!response.ok) {
+        throw new Error(`Failed to add product to cart: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("✅ Product added to cart:", data);
+      alert(`✅ Bundle added to cart!`);
+    } catch (error) {
+      console.error("❌ Error adding product to cart:", error);
+      alert(`❌ Error adding bundle to cart: ${error.message}`);
+    }
+  };
 </script>
 
 {% schema %}

@@ -1,4 +1,3 @@
-import { authenticate } from "../shopify.server";
 import { extractProductIds, flattenProductIds } from "app/utils/bundle.util";
 import { formatGid } from "app/utils/gid.util";
 import { ShopifyResourceType } from "app/enums/gid.enums";
@@ -10,52 +9,97 @@ import {
 } from "app/graphql/bundle.queries";
 import { retryWithDelay } from "app/utils/general.util";
 import productService from "./product.service";
+import { checkRequestType } from "app/utils/auth.util";
+import { AdminShopifyService } from "./api/adminShopify.api.service";
+import { SessionShopifyService } from "./api/sessionShopify.api.service";
 
-const createBundle = async (
-  // TODO: fix this types issue!
-  request: any,
-  input: BundleInput,
-) => {
-  const { admin } = await authenticate.admin(request);
-
+const createBundle = async (request: Request, input: BundleInput) => {
   try {
-    const response = await admin.graphql(GRAPHQL_PRODUCT_BUNDLE_CREATE, {
-      variables: input,
-    });
+    // ✅ Step 1: Check request type
+    const { isAdmin, isSession } = await checkRequestType(request);
 
-    const responseJson = await response.json();
-    const bundleOperationId =
-      await responseJson.data?.productBundleCreate?.productBundleOperation?.id;
-    let bundleProductId = await getProductIdFromBundleOperation(
-      request,
-      bundleOperationId,
-    );
-
-    if (!bundleProductId) bundleProductId = "";
-
-    const userErrors = responseJson.data?.bundleCreate?.userErrors;
-
-    const productsIds = extractProductIds(input);
-
-    // Update bundle product metafield.
-    const res = await updateBundleMetafieldProductsIds(
-      request,
-      bundleProductId,
-      productsIds,
-    );
-
-    if (userErrors?.length) {
-      throw new Error(
-        `Bundle creation failed: ${userErrors.map((e: any) => e.message).join(", ")}`,
+    if (isAdmin) {
+      // ✅ Step 2: Proceed with Admin API request
+      const data: any = await AdminShopifyService.executeGraphQL(
+        request,
+        GRAPHQL_PRODUCT_BUNDLE_CREATE,
+        input,
       );
+
+      const bundleOperationId =
+        data?.productBundleCreate?.productBundleOperation?.id;
+      let bundleProductId = await getProductIdFromBundleOperation(
+        request,
+        bundleOperationId,
+      );
+
+      if (!bundleProductId) bundleProductId = "";
+
+      const userErrors = data?.bundleCreate?.userErrors;
+      const productsIds = extractProductIds(input);
+
+      // ✅ Update bundle product metafield
+      await updateBundleMetafieldProductsIds(
+        request,
+        bundleProductId,
+        productsIds,
+      );
+
+      if (userErrors?.length) {
+        throw new Error(
+          `Bundle creation failed: ${userErrors.map((e: any) => e.message).join(", ")}`,
+        );
+      }
+
+      // ✅ Set bundle product status to ACTIVE
+      await productService.updateProduct(request, {
+        id: bundleProductId,
+        status: "ACTIVE",
+      });
+
+      return bundleProductId;
+    } else if (isSession) {
+      // ✅ Step 3: Handle session request
+      console.log("sagy28", "Session request");
+
+      const data: any = await SessionShopifyService.executeGraphQL(
+        request,
+        GRAPHQL_PRODUCT_BUNDLE_CREATE,
+        input,
+      );
+
+      console.log("sagy29", data);
+
+      const bundleOperationId =
+        data?.productBundleCreate?.productBundleOperation?.id;
+      let bundleProductId = await getProductIdFromBundleOperation(
+        request,
+        bundleOperationId,
+      );
+
+      if (!bundleProductId) bundleProductId = "";
+
+      console.log("Bundle product ID (Session):", bundleProductId);
+
+      // ✅ Step 4: Extract product IDs
+      const productsIds = extractProductIds(input);
+
+      // ✅ Step 5: Update bundle product metafield for session-based requests
+      await updateBundleMetafieldProductsIds(
+        request,
+        bundleProductId,
+        productsIds,
+      );
+
+      await productService.updateProduct(request, {
+        id: bundleProductId,
+        status: "ACTIVE",
+      });
+
+      return bundleProductId;
     }
 
-    const updatedBundleStatus = await productService.updateProduct(request, {
-      id: bundleProductId,
-      status: "ACTIVE",
-    });
-
-    return bundleProductId;
+    throw new Error("Unauthorized: No valid admin or session.");
   } catch (error) {
     console.error("Error creating bundle:", error);
     throw new Error("Failed to create bundle.");
@@ -67,41 +111,62 @@ const updateBundleMetafieldProductsIds = async (
   productId: string,
   bundledProductIds: string[],
 ) => {
-  const { admin } = await authenticate.admin(request);
-
-  const formattedProductId = formatGid(productId, ShopifyResourceType.Product);
-  const formattedBundledProducts = bundledProductIds
-    .map((id) => formatGid(id, ShopifyResourceType.Product))
-    .join(", ");
-
-  const variables = {
-    input: {
-      id: formattedProductId,
-      metafields: [
-        {
-          namespace: "custom",
-          key: "product_bundles",
-          type: "single_line_text_field",
-          value: formattedBundledProducts,
-        },
-      ],
-    },
-  };
-
   try {
-    const response = await admin.graphql(GRAPHQL_PRODUCT_UPDATE_METAFIELDS, {
-      variables,
-    });
-    const responseJson = await response.json();
+    // ✅ Step 1: Check request type
+    const { isAdmin, isSession } = await checkRequestType(request);
 
-    const userErrors = responseJson.data?.productUpdate?.userErrors;
+    // ✅ Step 2: Format Product & Metafield Data
+    const formattedProductId = formatGid(
+      productId,
+      ShopifyResourceType.Product,
+    );
+    const formattedBundledProducts = bundledProductIds
+      .map((id) => formatGid(id, ShopifyResourceType.Product))
+      .join(", ");
+
+    const variables = {
+      input: {
+        id: formattedProductId,
+        metafields: [
+          {
+            namespace: "custom",
+            key: "product_bundles",
+            type: "single_line_text_field",
+            value: formattedBundledProducts,
+          },
+        ],
+      },
+    };
+
+    let data: any = null;
+
+    if (isAdmin) {
+      // ✅ Step 3: Execute GraphQL Request via Admin API
+      data = await AdminShopifyService.executeGraphQL(
+        request,
+        GRAPHQL_PRODUCT_UPDATE_METAFIELDS,
+        variables,
+      );
+    } else if (isSession) {
+      // ✅ Step 4: Execute GraphQL Request via Session API
+      data = await SessionShopifyService.executeGraphQL(
+        request,
+        GRAPHQL_PRODUCT_UPDATE_METAFIELDS,
+        variables,
+      );
+    } else {
+      throw new Error("Unauthorized: No valid admin or session.");
+    }
+
+    // ✅ Step 5: Handle API Response
+    const userErrors = data?.productUpdate?.userErrors;
     if (userErrors?.length) {
       throw new Error(
         `Metafield update failed: ${userErrors.map((e: any) => e.message).join(", ")}`,
       );
     }
 
-    return responseJson.data?.productUpdate?.product?.metafields.edges.map(
+    return data?.productUpdate?.product?.metafields.edges.map(
       (edge: any) => edge.node,
     );
   } catch (error) {
@@ -114,16 +179,34 @@ const getProductIdFromBundleOperation = async (
   request: Request,
   bundleOperationId: string,
 ): Promise<string | null> => {
-  const { admin } = await authenticate.admin(request);
+  try {
+    const { isAdmin, isSession } = await checkRequestType(request);
 
-  return retryWithDelay(async () => {
-    const response = await admin.graphql(GRAPHQL_PRODUCT_BUNDLE_OPERATION, {
-      variables: { id: bundleOperationId },
-    });
+    if (isAdmin) {
+      return retryWithDelay(async () => {
+        const data: any = await AdminShopifyService.executeGraphQL(
+          request,
+          GRAPHQL_PRODUCT_BUNDLE_OPERATION,
+          { id: bundleOperationId },
+        );
+        return data?.productOperation?.product?.id || null;
+      });
+    } else if (isSession) {
+      return retryWithDelay(async () => {
+        const data: any = await SessionShopifyService.executeGraphQL(
+          request,
+          GRAPHQL_PRODUCT_BUNDLE_OPERATION,
+          { id: bundleOperationId },
+        );
+        return data?.productOperation?.product?.id || null;
+      });
+    }
 
-    const responseJson = await response.json();
-    return responseJson.data?.productOperation?.product?.id || null;
-  });
+    throw new Error("Unauthorized: No valid admin or session.");
+  } catch (error) {
+    console.error("Error retrieving product ID from bundle operation:", error);
+    return null;
+  }
 };
 
 export default {
