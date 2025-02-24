@@ -74,22 +74,34 @@ const updateProductVariants = async (
 };
 
 const deleteProduct = async (request: Request, input: { id: string }) => {
-  const { admin } = await authenticate.admin(request);
+  try {
+    // Check request type (admin or session)
+    const { isAdmin } = await checkRequestType(request);
 
-  const response = await admin.graphql(GRAPHQL_DELETE_PRODUCT, {
-    variables: { id: input.id },
-  });
+    if (!isAdmin) {
+      throw new Error("Unauthorized: Only admin users can delete products.");
+    }
 
-  const responseJson = await response.json();
-
-  const errors = responseJson.data?.productDelete?.userErrors;
-  if (errors?.length) {
-    throw new Error(
-      `Failed to delete product: ${errors.map((e: any) => e.message).join(", ")}`,
+    // Execute the GraphQL mutation via Admin API
+    const data: any = await AdminShopifyService.executeGraphQL(
+      request,
+      GRAPHQL_DELETE_PRODUCT,
+      { id: input.id },
     );
-  }
 
-  return responseJson.data?.productDelete?.deletedProductId || null;
+    // Check for GraphQL user errors
+    const errors = data?.productDelete?.userErrors;
+    if (errors?.length) {
+      throw new Error(
+        `Failed to delete product: ${errors.map((e: any) => e.message).join(", ")}`,
+      );
+    }
+
+    return data?.productDelete?.deletedProductId || null;
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    return null;
+  }
 };
 
 export const getProductById = async (
