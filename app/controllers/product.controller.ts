@@ -2,6 +2,7 @@ import ProductService from "app/services/product.service";
 
 const createProduct = async (request: Request) => {
   try {
+    console.log("sagy3");
     const product = await ProductService.createProduct(request, {
       title: `just created: ${new Date().toLocaleString()}`,
     });

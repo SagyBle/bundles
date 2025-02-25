@@ -123,3 +123,19 @@ export const GRAPHQL_GET_PRODUCT_METAFIELDS = `#graphql
         }
       }
     }`;
+
+export const GRAPHQL_GET_PRODUCT_DEFAULT_VARIANT_ID = `#graphql
+  query GetProductDefaultVariantId($productId: ID!) {
+    product(id: $productId) {
+      id
+      title
+      variants(first: 1) {
+        edges {
+          node {
+            id
+          }
+        }
+      }
+    }
+  }
+`;

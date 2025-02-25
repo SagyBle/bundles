@@ -20,9 +20,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   if (request.method === "POST") {
+    console.log("sagy1");
+
     return bundleController.createBundle(request);
   }
-
   return { success: false, error: "Invalid request method" };
 };
 

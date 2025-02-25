@@ -2,6 +2,7 @@ import {
   GRAPHQL_CREATE_PRODUCT,
   GRAPHQL_DELETE_PRODUCT,
   GRAPHQL_GET_PRODUCT_BY_ID,
+  GRAPHQL_GET_PRODUCT_DEFAULT_VARIANT_ID,
   GRAPHQL_GET_PRODUCT_METAFIELDS,
   GRAPHQL_GET_PRODUCT_OPTIONS,
   GRAPHQL_UPDATE_PRODUCT,
@@ -83,14 +84,42 @@ const updateProductVariants = async (
   request: Request,
   input: { productId: string; variants: ProductVariantUpdateInput[] },
 ) => {
-  const { admin } = await authenticate.admin(request);
+  try {
+    // ✅ Step 1: Check request type
+    const { isAdmin, isSession } = await checkRequestType(request);
 
-  const response = await admin.graphql(GRAPHQL_UPDATE_PRODUCT_VARIANTS, {
-    variables: { productId: input.productId, variants: input.variants },
-  });
+    let data: any = null;
 
-  const responseJson = await response.json();
-  return responseJson.data?.productVariantsBulkUpdate?.productVariants || null;
+    if (isAdmin) {
+      // ✅ Step 2: Execute Admin API request
+      data = await AdminShopifyService.executeGraphQL(
+        request,
+        GRAPHQL_UPDATE_PRODUCT_VARIANTS,
+        {
+          productId: input.productId,
+          variants: input.variants,
+        },
+      );
+    } else if (isSession) {
+      // ✅ Step 3: Execute Session API request
+      data = await SessionShopifyService.executeGraphQL(
+        request,
+        GRAPHQL_UPDATE_PRODUCT_VARIANTS,
+        {
+          productId: input.productId,
+          variants: input.variants,
+        },
+      );
+    } else {
+      throw new Error("Unauthorized: No valid admin or session.");
+    }
+
+    // ✅ Step 4: Return updated product variants
+    return data?.productVariantsBulkUpdate?.productVariants || null;
+  } catch (error) {
+    console.error("❌ Error updating product variants:", error);
+    return null;
+  }
 };
 
 const deleteProduct = async (request: Request, input: { id: string }) => {
@@ -156,62 +185,64 @@ export const getProductMetafields = async (
   );
 };
 
-// export const getProductOptions = async (
-//   request: Request,
-//   input: { id: string },
-// ) => {
-//   const { admin } = await authenticate.admin(request);
-
-//   const response = await admin.graphql(GRAPHQL_GET_PRODUCT_OPTIONS, {
-//     variables: { id: input.id },
-//   });
-
-//   const responseJson = await response.json();
-
-//   return (
-//     responseJson.data?.product?.options?.map((option: any) => ({
-//       componentOptionId: option.id,
-//       name: option.name,
-//       values: option.values,
-//     })) || []
-//   );
-// };
 export const getProductOptions = async (
   request: Request,
   input: { id: string },
 ) => {
   try {
-    // Determine if the request is from an admin or a session
+    // ✅ Step 1: Determine if the request is from Admin or Session
     const { isAdmin, isSession } = await checkRequestType(request);
 
-    let data: any = null;
-
-    if (isAdmin) {
-      data = await AdminShopifyService.executeGraphQL(
-        request,
-        GRAPHQL_GET_PRODUCT_OPTIONS,
-        { id: input.id },
-      );
-    } else if (isSession) {
-      data = await SessionShopifyService.executeGraphQL(
-        request,
-        GRAPHQL_GET_PRODUCT_OPTIONS,
-        { id: input.id },
-      );
-    } else {
+    if (!isAdmin && !isSession) {
       throw new Error("Unauthorized: No valid admin or session.");
     }
 
-    return (
-      data?.product?.options?.map((option: any) => ({
-        componentOptionId: option.id,
-        name: option.name,
-        values: option.values,
-      })) || []
+    // ✅ Step 2: Choose API Service Based on Request Type
+    const apiService = isAdmin ? AdminShopifyService : SessionShopifyService;
+
+    // ✅ Step 3: Execute GraphQL Query
+    const data: any = await apiService.executeGraphQL(
+      request,
+      GRAPHQL_GET_PRODUCT_OPTIONS,
+      { id: input.id },
     );
+
+    // ✅ Step 4: Handle API Errors
+    if (!data?.product?.options) {
+      console.error("❌ GraphQL Error - No product options returned:", data);
+      return [];
+    }
+
+    // ✅ Step 5: Return Product Options
+    return data.product.options.map((option: any) => ({
+      componentOptionId: option.id,
+      name: option.name,
+      values: option.values,
+    }));
   } catch (error) {
-    console.error("Error fetching product options:", error);
+    console.error("❌ Error fetching product options:", error);
     return [];
+  }
+};
+
+export const getProductDefaultVariantId = async (
+  request: Request,
+  apiService: typeof AdminShopifyService | typeof SessionShopifyService,
+  input: { productId: string },
+) => {
+  try {
+    // Execute GraphQL query using the provided API service
+    const data: any = await apiService.executeGraphQL(
+      request,
+      GRAPHQL_GET_PRODUCT_DEFAULT_VARIANT_ID,
+      { productId: input.productId },
+    );
+
+    // Extract and return the default variant ID
+    return data?.product?.variants?.edges?.[0]?.node?.id || null;
+  } catch (error) {
+    console.error("❌ Error fetching default variant ID:", error);
+    return null;
   }
 };
 

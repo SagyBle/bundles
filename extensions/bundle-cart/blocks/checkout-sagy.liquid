@@ -1,4 +1,4 @@
-<p>Sagy Blechessss</p>
+<p>Sagy41</p>
 
 <!-- ✅ Checkout Buttons -->
 <button id="checkout-button1" onclick="testProxy()" style="
@@ -50,8 +50,24 @@
   Add Bundle to Cart
 </button>
 
+<!-- ✅ Add Bundle to Cart Button -->
+<button id="getProductId" onclick="getCurrentProductId()" style="
+  padding: 10px 20px;
+  background-color: #008060;
+  color: white;
+  border: none;
+  cursor: pointer;
+  margin-top: 10px;
+  font-size: 16px;
+">
+  Get current productId
+</button>
+
 <!-- ✅ JavaScript for Storefront Actions -->
 <script>
+
+  window.currentProductId = "{{ product.id }}";
+
   const createProductProxy = async () => {
     console.log("🚀 Sending request...");
 
@@ -73,13 +89,16 @@
         body: JSON.stringify(requestBody),
       });
 
+
+      
+
       if (!response.ok) {
         throw new Error(`Request failed: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log("✅ Response:", data);
-      alert(`✅ Success: ${data.message}`);
+      console.log("✅ Response:", JSON.stringify(data));
+      // alert(`✅ Success: ${data.message}`);
     } catch (error) {
       console.error("❌ Fetch Error:", error);
       alert(`❌ Error: ${error.message}`);
@@ -123,54 +142,93 @@
     console.log("🚀 Sending create bundle request...");
 
     try {
-      // First request to /bundlespublic
-      const responsePublic = await fetch("https://sagy-test-academy.myshopify.com/apps/checkout-proxy/bundles", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-        body: JSON.stringify({}),
-      });
+        const responseBundle = await fetch("https://sagy-test-academy.myshopify.com/apps/checkout-proxy/bundlespublic", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+            },
+            body: JSON.stringify({ firstProductId: window.currentProductId }),
+        });
 
-      if (!responsePublic.ok) {
-        throw new Error(`Public request failed: ${responsePublic.status}`);
-      }
+        if (!responseBundle.ok) {
+            throw new Error(`Bundle request failed: ${responseBundle.status}`);
+        }
 
-      const dataPublic = await responsePublic.json();
-      console.log("✅ Response from /bundlespublic:", dataPublic);
+        const dataBundle = await responseBundle.json();
+        console.log("✅ sagy200 Bundle response:", dataBundle);
 
-      // Second request to /bundles
-      const responseBundle = await fetch("https://sagy-test-academy.myshopify.com/apps/checkout-proxy/bundles", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-        body: JSON.stringify({}),
-      });
+        // Extract variantIdNumeric safely
+        const variantId = dataBundle?.data?.variantId;
+        const variantIdNumeric = dataBundle?.data?.variantIdNumeric;
 
-      if (!responseBundle.ok) {
-        throw new Error(`Bundle request failed: ${responseBundle.status}`);
-      }
+        if (!variantIdNumeric) {
+            throw new Error("❌ Error: Variant ID is missing or invalid.");
+        }
 
-      const dataBundle = await responseBundle.json();
-      console.log("✅ Response from /bundles:", dataBundle);
+        console.log("✅ Extracted variantId:", variantId);
+        console.log("✅ Extracted variantIdNumeric:", variantIdNumeric);
 
-      alert(`✅ Success: ${dataPublic.message}, ${dataBundle.message}`);
+            setTimeout(() => {
+        addBundleToCart(variantIdNumeric);
+        }, 500);
+
+        // Ensure addBundleToCart is only called when variantIdNumeric is valid
+        // await addBundleToCart(variantIdNumeric);
+
+        // alert(`✅ Success: ${dataBundle.message}`);
     } catch (error) {
-      console.error("❌ Fetch Error:", error);
-      alert(`❌ Error: ${error.message}`);
+        console.error("❌ Fetch Error:", error);
+        alert(`❌ Error: ${error.message}`);
     }
-  };
+};
+
+
+  // // ✅ Add Product to Cart (Mock Bundle ID)
+  // const addBundleToCart = async (variantIdNumeric) => {
+  //   console.log("🚀 Adding bundle to cart...", variantIdNumeric);
+
+  //   // Mock Bundle Product ID (Replace with actual ID from bundle creation response)
+  //   // NOTICE: Put numeric variant id number
+  //   // const variantId = "50613593375007"; 
+  
+  //   try {
+  //     const response = await fetch("/cart/add.js", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         id: variantIdNumeric, // Shopify Variant ID
+  //         quantity: 1,
+  //       }),
+  //     });
+
+  //     console.log("sagy17", JSON.stringify(response));
+      
+
+  //     if (!response.ok) {
+  //       throw new Error(`Failed to add product to cart: ${response.status}`);
+  //     }
+
+  //     const data = await response.json();
+  //     console.log("✅ Product added to cart:", data);
+  //     // alert(`✅ Bundle added to cart!`);
+  //   } catch (error) {
+  //     console.error("❌ Error adding product to cart:", error);
+  //     alert(`❌ Error adding bundle to cart: ${error.message}`);
+  //   }
+  // };
 
   // ✅ Add Product to Cart (Mock Bundle ID)
-  const addBundleToCart = async () => {
-    console.log("🚀 Adding bundle to cart...");
+  const addBundleToCart = async (variantId) => {
+    console.log("🚀 Adding bundle to cart...", typeof variantId, variantId);
 
     // Mock Bundle Product ID (Replace with actual ID from bundle creation response)
     // NOTICE: Put numeric variant id number
-    const variantId = "50613593375007"; 
+    // const variantId = "50615950835999"; 
+
+    // variantId = "50615964139807";
 
     try {
       const response = await fetch("/cart/add.js", {
@@ -199,6 +257,28 @@
       alert(`❌ Error adding bundle to cart: ${error.message}`);
     }
   };
+
+
+
+    const extractIdFromGid = (gid) => {
+      const idStr = String(gid);
+
+      if (idStr.startsWith("gid://shopify/")) {
+        return idStr.split("/").pop() || "";
+      }
+
+      return idStr;
+    }
+
+  const getCurrentProductId = () => {
+  if (window.currentProductId) {
+    console.log("✅ Current Product ID:", window.currentProductId);
+    return window.currentProductId;
+  } else {
+    console.error("❌ Error: Unable to retrieve product ID.");
+    return null;
+  }
+};
 </script>
 
 {% schema %}

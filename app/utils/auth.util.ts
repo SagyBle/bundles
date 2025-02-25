@@ -12,17 +12,16 @@ export async function checkRequestType(request: Request) {
     const authAdmin = await authenticate.admin(request);
     admin = authAdmin?.admin || null;
     if (admin) isAdmin = true;
-  } catch (error) {
-    console.error("Admin authentication failed:", error);
-  }
+  } catch (error) {}
 
   try {
     const authSession = await authenticate.public.appProxy(request);
     session = authSession?.session || null;
     if (session) isSession = true;
-  } catch (error) {
-    console.error("Session authentication failed:", error);
-  }
+  } catch (error) {}
+
+  if (!isAdmin && !isSession)
+    console.log("Authentication FAILED, no session, no admin.");
 
   return { isAdmin, isSession, admin, session };
 }
