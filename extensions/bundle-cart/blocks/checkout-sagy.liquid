@@ -1,4 +1,4 @@
-<p>Sagy41</p>
+<p>Sagy43</p>
 
 <!-- ✅ Checkout Buttons -->
 <button id="checkout-button1" onclick="testProxy()" style="
@@ -63,7 +63,6 @@
   Get current productId
 </button>
 
-<!-- ✅ JavaScript for Storefront Actions -->
 <script>
 
   window.currentProductId = "{{ product.id }}";
@@ -139,6 +138,8 @@
   };
 
   const createBundle = async () => {
+    const startTime = Date.now();  
+
     console.log("🚀 Sending create bundle request...");
 
     try {
@@ -170,7 +171,7 @@
         console.log("✅ Extracted variantIdNumeric:", variantIdNumeric);
 
             setTimeout(() => {
-        addBundleToCart(variantIdNumeric);
+        addBundleToCart(variantIdNumeric, startTime);
         }, 500);
 
         // Ensure addBundleToCart is only called when variantIdNumeric is valid
@@ -184,51 +185,11 @@
 };
 
 
-  // // ✅ Add Product to Cart (Mock Bundle ID)
-  // const addBundleToCart = async (variantIdNumeric) => {
-  //   console.log("🚀 Adding bundle to cart...", variantIdNumeric);
-
-  //   // Mock Bundle Product ID (Replace with actual ID from bundle creation response)
-  //   // NOTICE: Put numeric variant id number
-  //   // const variantId = "50613593375007"; 
   
-  //   try {
-  //     const response = await fetch("/cart/add.js", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         id: variantIdNumeric, // Shopify Variant ID
-  //         quantity: 1,
-  //       }),
-  //     });
-
-  //     console.log("sagy17", JSON.stringify(response));
-      
-
-  //     if (!response.ok) {
-  //       throw new Error(`Failed to add product to cart: ${response.status}`);
-  //     }
-
-  //     const data = await response.json();
-  //     console.log("✅ Product added to cart:", data);
-  //     // alert(`✅ Bundle added to cart!`);
-  //   } catch (error) {
-  //     console.error("❌ Error adding product to cart:", error);
-  //     alert(`❌ Error adding bundle to cart: ${error.message}`);
-  //   }
-  // };
-
+  // NOTICE: Put numeric variant id number
   // ✅ Add Product to Cart (Mock Bundle ID)
-  const addBundleToCart = async (variantId) => {
+  const addBundleToCart = async (variantId, startTime) => {
     console.log("🚀 Adding bundle to cart...", typeof variantId, variantId);
-
-    // Mock Bundle Product ID (Replace with actual ID from bundle creation response)
-    // NOTICE: Put numeric variant id number
-    // const variantId = "50615950835999"; 
-
-    // variantId = "50615964139807";
 
     try {
       const response = await fetch("/cart/add.js", {
@@ -237,20 +198,19 @@
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          id: variantId, // Shopify Variant ID
+          id: variantId,
           quantity: 1,
         }),
       });
-
-      console.log("sagy17", response);
       
-
       if (!response.ok) {
         throw new Error(`Failed to add product to cart: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log("✅ Product added to cart:", data);
+      const endTime = Date.now();  // Stop the timer
+      const elapsedTime = (endTime - startTime) / 1000;  // Convert to seconds
+      console.log("✅ Product added to cart:", data, "total time:", elapsedTime);
       alert(`✅ Bundle added to cart!`);
     } catch (error) {
       console.error("❌ Error adding product to cart:", error);

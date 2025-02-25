@@ -51,11 +51,11 @@ const createBundle = async (request: Request, input: BundleInput) => {
         );
       }
 
-      // ✅ Set bundle product status to ACTIVE
-      await productService.updateProduct(request, {
-        id: bundleProductId,
-        status: "ACTIVE",
-      });
+      // // ✅ Set bundle product status to ACTIVE
+      // await productService.updateProduct(request, {
+      //   id: bundleProductId,
+      //   status: "ACTIVE",
+      // });
 
       return bundleProductId;
     } else if (isSession) {
