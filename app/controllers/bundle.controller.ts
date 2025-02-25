@@ -41,10 +41,14 @@ const createBundle = async (request: Request) => {
     // ✅ Step 3: Extract data from JSON body
     const data = await request.json();
     firstProductId = data?.firstProductId;
+    secondProductId = data?.secondProductId;
 
     // ✅ Step 4: Create new product (only in session requests)
-    const createdProduct = await ProductController.createProduct(request);
-    secondProductId = createdProduct?.product?.id || null;
+
+    if (!secondProductId) {
+      const createdProduct = await ProductController.createProduct(request);
+      secondProductId = createdProduct?.product?.id || null;
+    }
   } else {
     return json(ApiResponse.error("Unauthorized: No valid admin or session."), {
       status: 401,

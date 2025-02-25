@@ -36,6 +36,17 @@
 ">
   Create Bundle
 </button>
+<button id="checkout-button3" onclick="createBundle('10082427797791')" style="
+  padding: 10px 20px;
+  background-color: #008060;
+  color: white;
+  border: none;
+  cursor: pointer;
+  margin-top: 10px;
+  font-size: 16px;
+">
+  Create Bundle with Exsist Product
+</button>
 
 <!-- ✅ Add Bundle to Cart Button -->
 <button id="checkout-button4" onclick="addBundleToCart()" style="
@@ -137,10 +148,11 @@
     }
   };
 
-  const createBundle = async () => {
+  const createBundle = async (secondProductId) => {
     const startTime = Date.now();  
 
     console.log("🚀 Sending create bundle request...");
+    
 
     try {
         const responseBundle = await fetch("https://sagy-test-academy.myshopify.com/apps/checkout-proxy/bundlespublic", {
@@ -149,7 +161,7 @@
                 "Content-Type": "application/json",
                 "Access-Control-Allow-Origin": "*",
             },
-            body: JSON.stringify({ firstProductId: window.currentProductId }),
+            body: JSON.stringify({ firstProductId: window.currentProductId, secondProductId: secondProductId || undefined }),
         });
 
         if (!responseBundle.ok) {
@@ -202,14 +214,16 @@
           quantity: 1,
         }),
       });
-      
+
       if (!response.ok) {
         throw new Error(`Failed to add product to cart: ${response.status}`);
       }
 
       const data = await response.json();
+
       const endTime = Date.now();  // Stop the timer
       const elapsedTime = (endTime - startTime) / 1000;  // Convert to seconds
+
       console.log("✅ Product added to cart:", data, "total time:", elapsedTime);
       alert(`✅ Bundle added to cart!`);
     } catch (error) {
