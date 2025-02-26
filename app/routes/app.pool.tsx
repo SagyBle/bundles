@@ -6,28 +6,19 @@ import type { LoaderFunction } from "@remix-run/node";
 
 import { apiVersion, authenticate } from "../shopify.server";
 import { useLoaderData } from "@remix-run/react";
+import Pool from "app/pool";
 
-export const loader: LoaderFunction = async ({ request }) => {
-  const response = await fetch("https://jsonplaceholder.typicode.com/users");
-  const data = await response.json();
+// export const loader: LoaderFunction = async ({ request }) => {
+// };
 
-  return data;
-};
-
-const Collections = () => {
+const StonesPool = () => {
   const collections: any = useLoaderData();
   console.log(collections, "collections");
   return (
     <Page>
-      <Layout>
-        <Layout.Section>
-          <Card>
-            <h1>Hello world</h1>
-          </Card>
-        </Layout.Section>
-      </Layout>
+      <Pool />
     </Page>
   );
 };
 
-export default Collections;
+export default StonesPool;

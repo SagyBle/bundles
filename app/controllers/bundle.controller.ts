@@ -43,6 +43,10 @@ const createBundle = async (request: Request) => {
     firstProductId = data?.firstProductId;
     secondProductId = data?.secondProductId;
 
+    if (data?.bundleTitle) {
+      title = data?.bundleTitle;
+    }
+
     // ✅ Step 4: Create new product (only in session requests)
 
     if (!secondProductId) {
@@ -113,8 +117,6 @@ const createBundle = async (request: Request) => {
       request,
       bundleInput,
     );
-
-    console.log("sagy22", bundleCreated);
 
     const apiService = isAdmin ? AdminShopifyService : SessionShopifyService;
     const variantId = await getProductDefaultVariantId(request, apiService, {

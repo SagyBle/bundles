@@ -1,4 +1,21 @@
-<p>Sagy43</p>
+
+
+<p>sagy121</p>
+
+{% comment %} <p>Related Stones: {{ product.description }}</p> {% endcomment %}
+<p>Related Stones: {{ product.metafields.custom.relatedstones }}</p>
+
+<p>Sagy 2</p>
+
+<p>sagy1</p>
+
+<p>Related Stones:</p>
+<div id="related-stones-container"></div> <!-- Where buttons will be added -->
+
+<h2>🔷 Chosen Stone: <span id="chosen-stone-title"></span></h2>
+
+
+
 
 <!-- ✅ Checkout Buttons -->
 <button id="checkout-button1" onclick="testProxy()" style="
@@ -13,7 +30,7 @@
   Test
 </button>
 
-<button id="checkout-button2" onclick="createProductProxy()" style="
+{% comment %} <button id="checkout-button2" onclick="createProductProxy()" style="
   padding: 10px 20px;
   background-color: #008060;
   color: white;
@@ -24,29 +41,19 @@
 ">
   Create Product
 </button>
+<button id="checkout-button2s" onclick="printRelatedStones()" style="
+  padding: 10px 20px;
+  background-color: #FF0000;
+  color: white;
+  border: none;
+  cursor: pointer;
+  margin-top: 10px;
+  font-size: 16px;
+">
+  Print Related Stones
+</button>
 
-<button id="checkout-button3" onclick="createBundle()" style="
-  padding: 10px 20px;
-  background-color: #008060;
-  color: white;
-  border: none;
-  cursor: pointer;
-  margin-top: 10px;
-  font-size: 16px;
-">
-  Create Bundle
-</button>
-<button id="checkout-button3" onclick="createBundle('10082427797791')" style="
-  padding: 10px 20px;
-  background-color: #008060;
-  color: white;
-  border: none;
-  cursor: pointer;
-  margin-top: 10px;
-  font-size: 16px;
-">
-  Create Bundle with Exsist Product
-</button>
+
 
 <!-- ✅ Add Bundle to Cart Button -->
 <button id="checkout-button4" onclick="addBundleToCart()" style="
@@ -72,9 +79,126 @@
   font-size: 16px;
 ">
   Get current productId
+</button> {% endcomment %}
+
+<button id="checkout-button3" onclick="createBundle()" style="
+  padding: 10px 20px;
+  background-color: #008060;
+  color: white;
+  border: none;
+  cursor: pointer;
+  margin-top: 10px;
+  font-size: 16px;
+">
+  Create Bundle
+</button>
+<button id="checkout-button3" onclick="createBundle('10057665249567')" style="
+  padding: 10px 20px;
+  background-color: #008060;
+  color: white;
+  border: none;
+  cursor: pointer;
+  margin-top: 10px;
+  font-size: 16px;
+">
+  Create Bundle with Exsist Product
 </button>
 
+
+<script src="{{ 'hello.js' | asset_url }}" defer></script>
+
+
+
+
 <script>
+// ✅ Call the imported function
+  document.addEventListener("DOMContentLoaded", function () {
+      if (window.printHelloWorld) {
+          window.printHelloWorld(); // Should log "Hello, World!" in console
+      } else {
+          console.error("❌ printHelloWorld is not loaded!");
+      }
+  });
+  // Parse the metafield JSON string
+  let relatedStones = `{{ product.metafields.custom.relatedstones }}`; // Escape to prevent syntax error
+  let chosenStone = null; // Default: No stone is chosen
+
+  function setChosenStone(stone) {
+      chosenStone = stone;
+      // chosenStoneTitle.innerText = `${stone.carat}ct ${stone.color}, ${stone.cut} - ${stone.price}$`;
+      console.log("✅ Chosen Stone Updated:", chosenStone);
+      document.getElementById("chosen-stone-title").innerText = chosenStone.productId;
+
+    }
+
+
+  relatedStones = JSON.parse(relatedStones)
+  const printRelatedStones =  () => {
+    console.log("Related Stones:",relatedStones);
+  }
+  if (relatedStones && relatedStones.stones.length > 0) {
+    console.log("✅ Parsed Related Stones:", relatedStones.stones);
+
+    const container = document.getElementById("related-stones-container");
+
+    // Separate stones based on carat size
+    const overOneCarat = relatedStones.stones.filter(stone => stone.carat > 1.0);
+    const underOrEqualOneCarat = relatedStones.stones.filter(stone => stone.carat <= 1.0);
+
+    function createStoneCard(stone) {
+      const card = document.createElement("div");
+      card.style = `
+        width: 200px;
+        height: auto;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 10px;
+        text-align: center;
+        background-color: #fff;
+      `;
+
+      const image = document.createElement("img");
+      image.src = stone.image;
+      image.alt = stone.stoneId;
+      image.style = "width: 100%; border-radius: 10px;";
+
+      const title = document.createElement("h3");
+      title.innerText = `${stone.carat}ct ${stone.color}, ${stone.cut} - ${stone.price}$`;
+      title.style = "font-size: 14px; margin: 10px 0; color: #333;";
+
+      const button = document.createElement("button");
+      button.innerText = "View Details";
+      button.style = `
+        padding: 8px 15px;
+        background-color: #008060;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        border-radius: 5px;
+      `;
+      button.onclick = () => console.log(`✅ Clicked:`, stone);
+
+      card.appendChild(image);
+      card.appendChild(title);
+      // card.appendChild(price);
+      card.appendChild(button);
+      card.onclick = () => setChosenStone(stone); // Clicking updates chosen stone
+
+      container.appendChild(card);
+    }
+
+    // Create buttons for stones over 1 carat
+    // overOneCarat.forEach(stone => createButton(stone, "Over 1 Carat"));
+    if (overOneCarat && overOneCarat.length > 0) createStoneCard(overOneCarat[0]);
+    if (underOrEqualOneCarat && underOrEqualOneCarat.length > 0) createStoneCard(underOrEqualOneCarat[0]);
+
+
+  } else {
+    console.warn("⚠ No related stones available.");
+  }
+
 
   window.currentProductId = "{{ product.id }}";
 
@@ -152,6 +276,21 @@
     const startTime = Date.now();  
 
     console.log("🚀 Sending create bundle request...");
+
+
+    if (chosenStone && chosenStone.productId){
+      secondProductId = chosenStone.productId;
+    }
+    else {
+      console.log("You have to choose a stone, in order to create a bundle.");
+      alert("You have to choose a stone, in order to create a bundle.");
+      return;
+    }
+    console.log("Creating bundle with:", {firstProductId: window.currentProductId, secondProductId});
+
+    const productName = `💍 {{ product.title | escape }}`;
+    const stoneTitle = `💎 ${chosenStone.carat}ct ${chosenStone.color}, ${chosenStone.cut}, ${chosenStone.clarity}`
+    const bundleTitle = ` ${productName}  ${stoneTitle}`;
     
 
     try {
@@ -161,7 +300,7 @@
                 "Content-Type": "application/json",
                 "Access-Control-Allow-Origin": "*",
             },
-            body: JSON.stringify({ firstProductId: window.currentProductId, secondProductId: secondProductId || undefined }),
+            body: JSON.stringify({ firstProductId: window.currentProductId, secondProductId: secondProductId || undefined, bundleTitle }),
         });
 
         if (!responseBundle.ok) {
@@ -186,10 +325,6 @@
         addBundleToCart(variantIdNumeric, startTime);
         }, 500);
 
-        // Ensure addBundleToCart is only called when variantIdNumeric is valid
-        // await addBundleToCart(variantIdNumeric);
-
-        // alert(`✅ Success: ${dataBundle.message}`);
     } catch (error) {
         console.error("❌ Fetch Error:", error);
         alert(`❌ Error: ${error.message}`);

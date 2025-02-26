@@ -1,0 +1,104 @@
+{
+  "stones": [
+    {
+      "productId": "P-001",
+      "variantId": "",
+      "stoneId": "DIA-001",
+      "color": "D",
+      "cut": "Excellent",
+      "carat": 1.2,
+      "clarity": "VVS1",
+      "price": "1500",
+      "image": "https://a.1stdibscdn.com/archivesE/upload/1121189/j_64779711555741110665/6477971_master.jpg"
+    },
+    {
+      "productId": "P-002",
+      "variantId": "",
+      "stoneId": "DIA-002",
+      "color": "G",
+      "cut": "Very Good",
+      "carat": 0.9,
+      "clarity": "VS2",
+      "price": "1200",
+      "image": "https://englanddiamond.com/sites/default/files/styles/280x280/public/import//Round%20Dia%201.png?itok=YYH6T8Gm"
+    },
+    {
+      "productId": "P-003",
+      "variantId": "",
+      "stoneId": "DIA-003",
+      "color": "H",
+      "cut": "Good",
+      "carat": 1.5,
+      "clarity": "VVS2",
+      "price": "2900",
+      "image": "https://www.ritani.com/cdn-cgi/image/width=640/https://mp20-assets.ritani.com/cms/Round_Single_0f46b08cd2/Round_Single_0f46b08cd2.jpg"
+    },
+    {
+      "productId": "10082618507551",
+      "variantId": "",
+      "stoneId": "DIA-004",
+      "color": "E",
+      "cut": "Ideal",
+      "carat": 1.0,
+      "clarity": "IF",
+      "price": "2300",
+      "image": "https://media.gettyimages.com/id/1417362114/photo/large-crystal-diamond-against-white-background.jpg?s=612x612&w=gi&k=20&c=hLXQ6xRA0ArYWWZr_52BpEZj_zJf_u93z8xIzTSDEeY="
+    },
+    {
+      "productId": "10082622767391",
+      "variantId": "",
+      "stoneId": "DIA-005",
+      "color": "F",
+      "cut": "Very Good",
+      "carat": 1.3,
+      "clarity": "SI1",
+      "price": "1800",
+      "image": "https://cdn.prod.website-files.com/5f89ba7d4b6f3712fa4761f1/606ebbf37bf6c88412d8a9b3_diamond.jpg"
+    },
+    {
+      "productId": "10082624012575",
+      "variantId": "",
+      "stoneId": "DIA-006",
+      "color": "D",
+      "cut": "Excellent",
+      "carat": 2.1,
+      "clarity": "VS1",
+      "price": "5000",
+      "image": "https://m.media-amazon.com/images/I/610xJ336BhL._AC_UY1100_.jpg"
+    },
+
+    {
+      "productId": "10082624930079",
+      "variantId": "",
+      "stoneId": "DIA-007",
+      "color": "H",
+      "cut": "Fair",
+      "carat": 1.8,
+      "clarity": "I1",
+      "price": "900",
+      "image": "https://media.gettyimages.com/id/1417362114/photo/large-crystal-diamond-against-white-background.jpg?s=612x612&w=gi&k=20&c=hLXQ6xRA0ArYWWZr_52BpEZj_zJf_u93z8xIzTSDEeY="
+    },
+    {
+      "productId": "10082625650975",
+      "variantId": "",
+      "stoneId": "DIA-008",
+      "color": "F",
+      "cut": "Ideal",
+      "carat": 2.5,
+      "clarity": "FL",
+      "price": "7800",
+      "image": "https://www.gemsociety.org/wp-content/uploads/2013/09/faceted-diamond-South-Africa-69.png"
+    },
+    {
+      "productId": "10082626371871",
+      "variantId": "",
+      "stoneId": "DIA-010",
+      "color": "E",
+      "cut": "Very Good",
+      "carat": 1.6,
+      "clarity": "VVS1",
+      "price": "2600",
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6ru0Ee2T9zDCrHWWhIkMPuMGp72qs61kB9g&s"
+    }
+  ]
+}
