@@ -4,14 +4,34 @@ const createProduct = async (request: Request) => {
   try {
     console.log("sagy3");
     const product = await ProductService.createProduct(request, {
-      title: `just created: ${new Date().toLocaleString()}`,
+      // title: `just created: ${new Date().toLocaleString()}`,
+      title: `test test test 2.63ct G Marquise, Excellent, VS1`,
+      metafields: [
+        {
+          namespace: "custom",
+          key: "shape",
+          value: "Marquise",
+          type: "single_line_text_field",
+        },
+        {
+          namespace: "custom",
+          key: "weight",
+          value: "2.63",
+          type: "single_line_text_field",
+        },
+        {
+          namespace: "custom",
+          key: "color",
+          value: "G",
+          type: "single_line_text_field",
+        },
+      ],
     });
     const variantId = product.variants.edges[0]?.node?.id;
     if (!variantId) throw new Error("Failed to retrieve product variant ID.");
-
     const updatedVariant = await ProductService.updateProductVariants(request, {
       productId: product.id,
-      variants: [{ id: variantId, price: "100.00" }],
+      variants: [{ id: variantId, price: "6867.00" }],
     });
 
     return { success: true, product, variant: updatedVariant };

@@ -14,7 +14,7 @@ import { AdminShopifyService } from "./api/adminShopify.api.service";
 import { checkRequestType } from "app/utils/auth.util";
 import { SessionShopifyService } from "./api/sessionShopify.api.service";
 
-const createProduct = async (request: Request, input: { title: string }) => {
+const createProduct = async (request: Request, input: any) => {
   try {
     const { isAdmin, isSession } = await checkRequestType(request);
 
