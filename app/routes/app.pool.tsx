@@ -7,6 +7,7 @@ import type { LoaderFunction } from "@remix-run/node";
 import { apiVersion, authenticate } from "../shopify.server";
 import { useLoaderData } from "@remix-run/react";
 import Pool from "app/pool";
+import PoolPage from "./pooladmin";
 
 // export const loader: LoaderFunction = async ({ request }) => {
 // };
@@ -16,7 +17,8 @@ const StonesPool = () => {
   console.log(collections, "collections");
   return (
     <Page>
-      <Pool />
+      {/* <Pool /> */}
+      <PoolPage />
     </Page>
   );
 };

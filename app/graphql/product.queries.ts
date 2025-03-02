@@ -139,3 +139,29 @@ export const GRAPHQL_GET_PRODUCT_DEFAULT_VARIANT_ID = `#graphql
     }
   }
 `;
+
+export const GRAPHQL_UPDATE_RELATED_STONES_METAFIELD = `
+  mutation UpdateRelatedStonesMetafield($productId: ID!, $relatedProductIds: String!) {
+    metafieldsSet(
+      metafields: [
+        {
+          ownerId: $productId
+          namespace: "custom"
+          key: "relatedstones"
+          type: "list.product_reference"
+          value: $relatedProductIds
+        }
+      ]
+    ) {
+      metafields {
+        id
+        key
+        value
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
