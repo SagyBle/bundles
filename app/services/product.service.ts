@@ -5,6 +5,7 @@ import {
   GRAPHQL_GET_PRODUCT_DEFAULT_VARIANT_ID,
   GRAPHQL_GET_PRODUCT_METAFIELDS,
   GRAPHQL_GET_PRODUCT_OPTIONS,
+  GRAPHQL_POPULATE_PRODUCT,
   GRAPHQL_UPDATE_PRODUCT,
   GRAPHQL_UPDATE_PRODUCT_VARIANTS,
 } from "app/graphql/product.queries";
@@ -171,13 +172,18 @@ export const getProductMetafields = async (
   request: Request,
   input: { productId: string },
 ) => {
+  console.log("sagy19");
+
   const { admin } = await authenticate.admin(request);
 
+  console.log("sagy200", input);
+
   const response = await admin.graphql(GRAPHQL_GET_PRODUCT_METAFIELDS, {
-    variables: { input },
+    variables: { input: input.productId },
   });
 
   const responseJson = await response.json();
+
   return (
     responseJson.data?.product?.metafields?.edges.map(
       (edge: any) => edge.node,
@@ -237,6 +243,7 @@ export const getProductDefaultVariantId = async (
       GRAPHQL_GET_PRODUCT_DEFAULT_VARIANT_ID,
       { productId: input.productId },
     );
+    console.log("sagy29", data);
 
     // Extract and return the default variant ID
     return data?.product?.variants?.edges?.[0]?.node?.id || null;
@@ -246,9 +253,48 @@ export const getProductDefaultVariantId = async (
   }
 };
 
+export const populateProduct = async (
+  request: Request,
+  input: { id: string },
+) => {
+  try {
+    const { isAdmin, isSession } = await checkRequestType(request);
+
+    if (!isAdmin && !isSession) {
+      throw new Error("Unauthorized: No valid admin or session.");
+    }
+
+    // ✅ Step 2: Determine API service based on request type
+    const apiService = isAdmin ? AdminShopifyService : SessionShopifyService;
+
+    // ✅ Step 3: Execute the GraphQL query
+    const data: any = await apiService.executeGraphQL(
+      request,
+      GRAPHQL_POPULATE_PRODUCT,
+      { id: input.id },
+    );
+
+    // ✅ Step 4: Handle errors or return the product data
+    if (!data?.product) {
+      console.error("❌ GraphQL Error - No product returned:", data);
+      return null;
+    }
+
+    return data.product;
+  } catch (error) {
+    console.error(
+      "❌ Error fetching product details including metafields:",
+      error,
+    );
+    return null;
+  }
+};
+
 export default {
   createProduct,
   updateProductVariants,
   deleteProduct,
   updateProduct,
+  getProductMetafields,
+  populateProduct,
 };

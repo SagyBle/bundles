@@ -165,3 +165,51 @@ export const GRAPHQL_UPDATE_RELATED_STONES_METAFIELD = `
     }
   }
 `;
+
+export const GRAPHQL_POPULATE_PRODUCT = `#graphql
+  query PopulateProduct($id: ID!) {
+    product(id: $id) {
+      id
+      title
+      description
+      handle
+      tags
+      vendor
+      productType
+      createdAt
+      updatedAt
+      images(first: 5) {
+        edges {
+          node {
+            originalSrc
+            altText
+          }
+        }
+      }
+      variants(first: 5) {
+        edges {
+          node {
+            id
+            title
+            price
+            sku
+            barcode
+            availableForSale
+          }
+        }
+      }
+      metafields(first: 10) {
+        edges {
+          node {
+            id
+            namespace
+            key
+            value
+            type
+            description
+          }
+        }
+      }
+    }
+  }
+`;

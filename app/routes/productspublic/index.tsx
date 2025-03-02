@@ -7,7 +7,9 @@ import ProductController from "app/controllers/product.controller";
 export const action = async ({ request }: ActionFunctionArgs) => {
   const url = new URL(request.url);
   const actionType = url.searchParams.get("action");
-  if (request.method === "POST") {
+  if (request.method === "POST" && actionType === "populate") {
+    return ProductController.populateProduct(request);
+  } else if (request.method === "POST") {
     return ProductController.createProduct(request);
   } else if (request.method === "DELETE") {
     return ProductController.deleteProduct(request);

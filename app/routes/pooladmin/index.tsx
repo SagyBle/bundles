@@ -32,6 +32,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return PoolController.updateRelatedStones(request);
   } else if (request.method === "POST" && actionType === "fetch-by-tags") {
     return PoolController.fetchProductsByTag(request);
+  } else if (
+    request.method === "POST" &&
+    actionType === "generate-metafields-query"
+  ) {
+    return PoolController.generateRingQuery(request);
   }
 
   return { success: false, error: "Invalid request method" };
@@ -43,6 +48,7 @@ export default function PoolAdminPage() {
   const [productId, setProductId] = useState("");
   const [relatedStones, setRelatedStones] = useState<string[]>([]);
   const [stoneInput, setStoneInput] = useState("");
+  const [ringProductId, setRingProductId] = useState("");
 
   useEffect(() => {
     if (fetcher.data?.message) {
@@ -93,6 +99,19 @@ export default function PoolAdminPage() {
     );
   };
 
+  const generateQueryFromMetafields = () => {
+    if (!ringProductId.trim()) {
+      shopify.toast.show(
+        "Please enter a valid ring product ID for metafields query.",
+      );
+      return;
+    }
+    fetcher.submit(
+      { productId: ringProductId },
+      { method: "POST", action: "/pooladmin?action=generate-metafields-query" },
+    );
+  };
+
   return (
     <Page>
       <Layout>
@@ -105,6 +124,26 @@ export default function PoolAdminPage() {
             <Button onClick={updatePoolDataType1}>Update Pool Type 1</Button>
             <Button onClick={updatePoolDataType2}>Update Pool Type 2</Button>
             <Button onClick={fetchProductsByTag}>Fetch Products By Tag</Button>
+          </Card>
+          <Card>
+            <Text as="h2" variant="headingMd">
+              Generate Query from Ring Metafields
+            </Text>
+            <Text as="p">
+              Provide a ring product ID to generate a query based on its
+              metafields.
+            </Text>
+
+            <TextField
+              label="Ring Product ID for Metafields"
+              value={ringProductId}
+              onChange={(value) => setRingProductId(value)}
+              autoComplete="off"
+              placeholder="Enter ring product ID"
+            />
+            <Button onClick={generateQueryFromMetafields}>
+              Generate Query from Metafields
+            </Button>
           </Card>
           <Card>
             <Text as="h2" variant="headingMd">

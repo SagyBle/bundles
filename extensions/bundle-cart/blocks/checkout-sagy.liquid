@@ -5,9 +5,10 @@
 {% comment %} <p>Related Stones: {{ product.description }}</p> {% endcomment %}
 <p>Related Stones: {{ product.metafields.custom.relatedstones }}</p>
 
-<p>Sagy 2</p>
-
-<p>sagy1</p>
+{% assign stoneslist = product.metafields.custom.relatedstones.value %}
+{% for st in stoneslist %}
+  {{st.title}} - <b>{{st.price |  money}}</b><br>
+{% endfor %}
 
 <p>Related Stones:</p>
 <div id="related-stones-container"></div> <!-- Where buttons will be added -->

@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "d7e54d6cd8ebf591a5b009889b4a4fc4"
-application_url = "https://slightly-contained-voip-arrangements.trycloudflare.com"
+application_url = "https://friend-joy-postal-everywhere.trycloudflare.com"
 embedded = true
 name = "bundles"
 handle = "bundles-88"
@@ -23,9 +23,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://slightly-contained-voip-arrangements.trycloudflare.com/auth/callback",
-  "https://slightly-contained-voip-arrangements.trycloudflare.com/auth/shopify/callback",
-  "https://slightly-contained-voip-arrangements.trycloudflare.com/api/auth/callback"
+  "https://friend-joy-postal-everywhere.trycloudflare.com/auth/callback",
+  "https://friend-joy-postal-everywhere.trycloudflare.com/auth/shopify/callback",
+  "https://friend-joy-postal-everywhere.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
