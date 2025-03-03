@@ -1,38 +1,114 @@
+import { TagKey, TagValue } from "app/enums/tag.enums";
 import ProductService from "app/services/product.service";
+import { Tag } from "app/utils/Tag.util";
 
 const createProduct = async (request: Request) => {
   try {
+    // Type check: shape that we allow
+    const shape = "Marquise";
+    // Make sure Weight tag is down to 2.6
+    const weight = "2.63";
+    // Range Check - between D to Z, only one big letter
+    const color = "G";
+    // Type check - Approved cut
+    const cut = "Excellent";
+    // Type check - Approved Clarity
+    const clarity = "VS1";
+
+    const imageUrl = "";
+    const alt = "";
+    const price = "6867.00";
+    // build util function title builder
+    const title = `${weight}ct ${color} ${shape}, ${cut}, ${clarity}`;
+    // Type check - Media, understnad which other media content types there are
+    const media = [
+      {
+        alt: title,
+        mediaContentType: "IMAGE",
+        originalSource:
+          "https://media.istockphoto.com/id/484234714/vector/example-free-grunge-retro-blue-isolated-stamp.jpg?s=612x612&w=0&k=20&c=97KgKGpcAKnn50Ubd8PawjUybzIesoXws7PdU_MJGzE=",
+      },
+    ];
+
+    const tags = [
+      Tag.generate(TagKey.Shape, shape),
+      Tag.generate(TagKey.Weight, weight),
+      Tag.generate(TagKey.Color, color),
+    ];
+
+    // Create shopify constants file with: "custom", "shape", "single_line_text_field"
+    const metafields = [
+      {
+        namespace: "custom",
+        key: "shape",
+        value: shape,
+        type: "single_line_text_field",
+      },
+      {
+        namespace: "custom",
+        key: "weight",
+        value: weight,
+        type: "single_line_text_field",
+      },
+      {
+        namespace: "custom",
+        key: "color",
+        value: color,
+        type: "single_line_text_field",
+      },
+    ];
+
+    // TODO: Sales channels - how to make it right?
+
     console.log("sagy3");
+
     const product = await ProductService.createProduct(request, {
-      // title: `just created: ${new Date().toLocaleString()}`,
-      title: `test test test 2.63ct G Marquise, Excellent, VS1`,
-      metafields: [
-        {
-          namespace: "custom",
-          key: "shape",
-          value: "Marquise",
-          type: "single_line_text_field",
-        },
-        {
-          namespace: "custom",
-          key: "weight",
-          value: "2.63",
-          type: "single_line_text_field",
-        },
-        {
-          namespace: "custom",
-          key: "color",
-          value: "G",
-          type: "single_line_text_field",
-        },
-      ],
+      title,
+      metafields,
+      tags,
     });
+
     const variantId = product.variants.edges[0]?.node?.id;
+    const inventoryItemId = product.variants.edges[0]?.node.inventoryItem.id;
+    // TODO: build this function
+    console.log("sagy149", product.id);
+
+    const uploadedMedia = await ProductService.createProductMedia(request, {
+      productId: product.id,
+      media,
+    });
+
+    if (!uploadedMedia) {
+      throw new Error("❌ Failed to upload media.");
+    }
+
+    console.log("sagy150", uploadedMedia);
+
+    // const locationId = await ShopService.getShopLocation(request);
+    const locationId = "gid://shopify/Location/103452410143";
+    console.log("sagy300", { inventoryItemId, locationId, variantId });
+
     if (!variantId) throw new Error("Failed to retrieve product variant ID.");
     const updatedVariant = await ProductService.updateProductVariants(request, {
       productId: product.id,
-      variants: [{ id: variantId, price: "6867.00" }],
+      variants: [{ id: variantId, price }],
     });
+
+    const updatedQunaity = await ProductService.adjustInventoryQuantity(
+      request,
+      { inventoryItemId, locationId, reason: "any reason" },
+    );
+
+    console.log("sagy2", { updatedQunaity });
+
+    // const updatedInventory = await ProductService.adjustInventoryQuantity(
+    //   request,
+    //   {
+    //     inventoryItemId,
+    //     availableDelta: 1,
+    //     locationId,
+    //   },
+    // );
 
     return { success: true, product, variant: updatedVariant };
   } catch (error: any) {

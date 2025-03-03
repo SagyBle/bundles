@@ -11,6 +11,9 @@ export const GRAPHQL_CREATE_PRODUCT = `#graphql
             node {
               id
               price
+              inventoryItem{
+                id
+              }
               barcode
               createdAt
             }
@@ -97,6 +100,9 @@ export const GRAPHQL_GET_PRODUCT_BY_ID = `#graphql
           node {
             id
             price
+            inventoryItem {
+              id
+            }
             barcode
             createdAt
           }
@@ -208,6 +214,45 @@ export const GRAPHQL_POPULATE_PRODUCT = `#graphql
             type
             description
           }
+        }
+      }
+    }
+  }
+`;
+
+export const GRAPHQL_CREATE_PRODUCT_MEDIA = `#graphql
+  mutation CreateProductMedia($productId: ID!, $media: [CreateMediaInput!]!) {
+    productCreateMedia(productId: $productId, media: $media) {
+      media {
+        id
+        preview {
+          image {
+            originalSrc
+          }
+        }
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+export const GRAPHQL_ADJUST_INVENTORY_QUANTITY = `#graphql
+  mutation InventoryAdjustQuantities($input: InventoryAdjustQuantitiesInput!) {
+    inventoryAdjustQuantities(input: $input) {
+      userErrors {
+        field
+        message
+      }
+      inventoryAdjustmentGroup {
+        createdAt
+        reason
+        referenceDocumentUri
+        changes {
+          name
+          delta
         }
       }
     }

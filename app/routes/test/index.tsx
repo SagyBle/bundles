@@ -79,15 +79,15 @@ export async function action({ request }: ActionFunctionArgs) {
 
   try {
     // ✅ Parse incoming request data
-    const data = await request.json();
+    const data = { data: "all good king" };
 
-    console.log("sagy11", data);
+    // console.log("sagy11", data);
 
     return cors(
       request,
       json(
         ApiResponse.success("Request processed successfully", {
-          requestData: data,
+          // requestData: data,
           requestType: {
             isAdmin: requestObject.isAdmin,
             isSession: requestObject.isSession,
