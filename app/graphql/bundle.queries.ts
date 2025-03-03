@@ -31,28 +31,6 @@ export const GRAPHQL_PRODUCT_BUNDLE_OPERATION = `#graphql
         }
       }`;
 
-export const GRAPHQL_PRODUCT_UPDATE_METAFIELDS = `#graphql
-mutation ProductUpdate($input: ProductInput!) {
-  productUpdate(input: $input) {
-    product {
-      metafields(first: 10) {
-        edges {
-          node {
-            namespace
-            key
-            value
-          }
-        }
-      }
-    }
-    userErrors {
-      field
-      message
-    }
-  }
-}
-`;
-
 export const GRAPHQL_NEW_UPDATE_PRODUCT_METAFIELDS = `#graphql
   mutation MetafieldsSet($metafields: [MetafieldsSetInput!]!) {
     metafieldsSet(metafields: $metafields) {

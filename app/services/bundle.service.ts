@@ -6,7 +6,6 @@ import {
   GRAPHQL_NEW_UPDATE_PRODUCT_METAFIELDS,
   GRAPHQL_PRODUCT_BUNDLE_CREATE,
   GRAPHQL_PRODUCT_BUNDLE_OPERATION,
-  GRAPHQL_PRODUCT_UPDATE_METAFIELDS,
 } from "app/graphql/bundle.queries";
 import { retryWithDelay } from "app/utils/general.util";
 import productService from "./product.service";

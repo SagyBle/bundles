@@ -36,6 +36,7 @@ const createProduct = async (request: Request) => {
       Tag.generate(TagKey.Color, color),
     ];
 
+    // Create shopify constants file with: "custom", "shape", "single_line_text_field"
     const metafields = [
       {
         namespace: "custom",
@@ -70,10 +71,6 @@ const createProduct = async (request: Request) => {
     // TODO: build this function
     console.log("sagy149", product.id);
 
-    // const uploadedMedia = await ProductService.createProductMedia(request, {
-    //   productId: product.id,
-    //   media,
-    // });
     const uploadedMedia = await ProductService.createProductMedia(request, {
       productId: product.id,
       media,

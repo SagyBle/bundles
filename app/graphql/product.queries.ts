@@ -1,28 +1,28 @@
-export const GRAPHQL_CREATE_PRODUCT = `#graphql
-  mutation CreateProduct($input: ProductCreateInput!) {
-    productCreate(product: $input) {
-      product {
-        id
-        title
-        handle
-        status
-        variants(first: 10) {
-          edges {
-            node {
-              id
-              price
-              inventoryItem{
-                id
-              }
-              barcode
-              createdAt
-            }
-          }
-        }
-      }
-    }
-  }
-`;
+// export const GRAPHQL_CREATE_PRODUCT = `#graphql
+//   mutation CreateProduct($input: ProductCreateInput!) {
+//     productCreate(product: $input) {
+//       product {
+//         id
+//         title
+//         handle
+//         status
+//         variants(first: 10) {
+//           edges {
+//             node {
+//               id
+//               price
+//               inventoryItem{
+//                 id
+//               }
+//               barcode
+//               createdAt
+//             }
+//           }
+//         }
+//       }
+//     }
+//   }
+// `;
 
 export const GRAPHQL_NEW_UPDATE_PRODUCT = `#graphql
   mutation UpdateProduct($product: ProductUpdateInput!) { 
