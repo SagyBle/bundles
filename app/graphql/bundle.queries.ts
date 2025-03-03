@@ -52,3 +52,22 @@ mutation ProductUpdate($input: ProductInput!) {
   }
 }
 `;
+
+export const GRAPHQL_NEW_UPDATE_PRODUCT_METAFIELDS = `#graphql
+  mutation MetafieldsSet($metafields: [MetafieldsSetInput!]!) {
+    metafieldsSet(metafields: $metafields) {
+      metafields {
+        key
+        namespace
+        value
+        createdAt
+        updatedAt
+      }
+      userErrors {
+        field
+        message
+        code
+      }
+    }
+  }
+`;

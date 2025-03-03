@@ -3,6 +3,7 @@ import { formatGid } from "app/utils/gid.util";
 import { ShopifyResourceType } from "app/enums/gid.enums";
 import { BundleInput } from "app/types/budnle.types";
 import {
+  GRAPHQL_NEW_UPDATE_PRODUCT_METAFIELDS,
   GRAPHQL_PRODUCT_BUNDLE_CREATE,
   GRAPHQL_PRODUCT_BUNDLE_OPERATION,
   GRAPHQL_PRODUCT_UPDATE_METAFIELDS,
@@ -50,12 +51,6 @@ const createBundle = async (request: Request, input: BundleInput) => {
           `Bundle creation failed: ${userErrors.map((e: any) => e.message).join(", ")}`,
         );
       }
-
-      // // ✅ Set bundle product status to ACTIVE
-      // await productService.updateProduct(request, {
-      //   id: bundleProductId,
-      //   status: "ACTIVE",
-      // });
 
       return bundleProductId;
     } else if (isSession) {
@@ -125,17 +120,15 @@ const updateBundleMetafieldProductsIds = async (
       .join(", ");
 
     const variables = {
-      input: {
-        id: formattedProductId,
-        metafields: [
-          {
-            namespace: "custom",
-            key: "product_bundles",
-            type: "single_line_text_field",
-            value: formattedBundledProducts,
-          },
-        ],
-      },
+      metafields: [
+        {
+          ownerId: formattedProductId,
+          key: "product_bundles",
+          namespace: "custom",
+          type: "single_line_text_field",
+          value: formattedBundledProducts,
+        },
+      ],
     };
 
     let data: any = null;
@@ -144,14 +137,14 @@ const updateBundleMetafieldProductsIds = async (
       // ✅ Step 3: Execute GraphQL Request via Admin API
       data = await AdminShopifyService.executeGraphQL(
         request,
-        GRAPHQL_PRODUCT_UPDATE_METAFIELDS,
+        GRAPHQL_NEW_UPDATE_PRODUCT_METAFIELDS,
         variables,
       );
     } else if (isSession) {
       // ✅ Step 4: Execute GraphQL Request via Session API
       data = await SessionShopifyService.executeGraphQL(
         request,
-        GRAPHQL_PRODUCT_UPDATE_METAFIELDS,
+        GRAPHQL_NEW_UPDATE_PRODUCT_METAFIELDS,
         variables,
       );
     } else {

@@ -36,7 +36,6 @@ const createProduct = async (request: Request) => {
       Tag.generate(TagKey.Color, color),
     ];
 
-    // Create shopify constants file with: "custom", "shape", "single_line_text_field"
     const metafields = [
       {
         namespace: "custom",
@@ -58,14 +57,12 @@ const createProduct = async (request: Request) => {
       },
     ];
 
-    // TODO: Sales channels - how to make it right?
-
     console.log("sagy3");
 
-    const product = await ProductService.createProduct(request, {
+    const product = await ProductService.newCreateProduct(request, {
       title,
-      metafields,
       tags,
+      metafields,
     });
 
     const variantId = product.variants.edges[0]?.node?.id;
@@ -73,6 +70,10 @@ const createProduct = async (request: Request) => {
     // TODO: build this function
     console.log("sagy149", product.id);
 
+    // const uploadedMedia = await ProductService.createProductMedia(request, {
+    //   productId: product.id,
+    //   media,
+    // });
     const uploadedMedia = await ProductService.createProductMedia(request, {
       productId: product.id,
       media,

@@ -7,8 +7,9 @@ import {
   GRAPHQL_GET_PRODUCT_DEFAULT_VARIANT_ID,
   GRAPHQL_GET_PRODUCT_METAFIELDS,
   GRAPHQL_GET_PRODUCT_OPTIONS,
+  GRAPHQL_NEW_CREATE_PRODUCT,
+  GRAPHQL_NEW_UPDATE_PRODUCT,
   GRAPHQL_POPULATE_PRODUCT,
-  GRAPHQL_UPDATE_PRODUCT,
   GRAPHQL_UPDATE_PRODUCT_VARIANTS,
 } from "app/graphql/product.queries";
 import { authenticate } from "app/shopify.server";
@@ -55,27 +56,35 @@ const updateProduct = async (
     // ✅ Step 1: Check request type
     const { isAdmin, isSession } = await checkRequestType(request);
 
+    const variables = {
+      product: {
+        // ✅ Changed from 'input' to 'product'
+        id: input.id,
+        ...(input.title && { title: input.title }),
+        ...(input.status && { status: input.status }),
+      },
+    };
+
     let data: any = null;
 
     if (isAdmin) {
       // ✅ Step 2: Execute Admin API request
       data = await AdminShopifyService.executeGraphQL(
         request,
-        GRAPHQL_UPDATE_PRODUCT,
-        { input },
+        GRAPHQL_NEW_UPDATE_PRODUCT,
+        variables,
       );
     } else if (isSession) {
       // ✅ Step 3: Execute Session API request
       data = await SessionShopifyService.executeGraphQL(
         request,
-        GRAPHQL_UPDATE_PRODUCT,
-        { input },
+        GRAPHQL_NEW_UPDATE_PRODUCT,
+        variables,
       );
     } else {
       throw new Error("Unauthorized: No valid admin or session.");
     }
 
-    // ✅ Step 4: Return updated product data
     return data?.productUpdate?.product || null;
   } catch (error) {
     console.error("Error updating product:", error);
@@ -388,8 +397,38 @@ const adjustInventoryQuantity = async (
   }
 };
 
+const newCreateProduct = async (request: Request, input: any) => {
+  try {
+    // ✅ Check if the request is from an admin
+    const { isAdmin } = await checkRequestType(request);
+
+    if (!isAdmin) {
+      throw new Error("Unauthorized: Only admin users can create products.");
+    }
+
+    // ✅ Execute GraphQL Mutation via AdminShopifyService
+    const data: any = await AdminShopifyService.executeGraphQL(
+      request,
+      GRAPHQL_NEW_CREATE_PRODUCT,
+      { product: input },
+    );
+
+    // ✅ Check for errors
+    if (data?.productCreate?.userErrors?.length) {
+      console.error("❌ Shopify Errors:", data.productCreate.userErrors);
+      return null;
+    }
+
+    return data?.productCreate?.product || null;
+  } catch (error) {
+    console.error("❌ Error creating product:", error);
+    return null;
+  }
+};
+
 export default {
   createProduct,
+  newCreateProduct,
   updateProductVariants,
   deleteProduct,
   updateProduct,

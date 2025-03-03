@@ -24,17 +24,23 @@ export const GRAPHQL_CREATE_PRODUCT = `#graphql
   }
 `;
 
-export const GRAPHQL_UPDATE_PRODUCT = `#graphql
-  mutation UpdateProduct($input: ProductInput!) {
-    productUpdate(input: $input) {
+export const GRAPHQL_NEW_UPDATE_PRODUCT = `#graphql
+  mutation UpdateProduct($product: ProductUpdateInput!) { 
+    productUpdate(product: $product) {  
       product {
         id
         title
+        status    
+        updatedAt  
         media(first: 10) {
           nodes {
+            id
             alt
             mediaContentType
             preview {
+              image {
+                url 
+              }
               status
             }
           }
@@ -254,6 +260,41 @@ export const GRAPHQL_ADJUST_INVENTORY_QUANTITY = `#graphql
           name
           delta
         }
+      }
+    }
+  }
+`;
+
+export const GRAPHQL_NEW_CREATE_PRODUCT = `#graphql
+  mutation newproductCreate($product: ProductCreateInput!) {
+    productCreate(product: $product) {
+      product {
+        id
+        title
+        variants(first: 1) {
+          edges {
+            node {
+              id
+              inventoryItem {
+                id
+              }
+            }
+          } 
+        }
+        options {
+          id
+          name
+          position
+          optionValues {
+            id
+            name
+            hasVariants
+          }
+        }
+      }
+      userErrors {
+        field
+        message
       }
     }
   }
