@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "d7e54d6cd8ebf591a5b009889b4a4fc4"
-application_url = "https://cedar-furniture-measures-motherboard.trycloudflare.com"
+application_url = "https://liabilities-ranks-ate-asset.trycloudflare.com"
 embedded = true
 name = "bundles"
 handle = "bundles-88"
@@ -19,13 +19,13 @@ api_version = "2025-01"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products"
+scopes = "write_products, write_inventory"
 
 [auth]
 redirect_urls = [
-  "https://cedar-furniture-measures-motherboard.trycloudflare.com/auth/callback",
-  "https://cedar-furniture-measures-motherboard.trycloudflare.com/auth/shopify/callback",
-  "https://cedar-furniture-measures-motherboard.trycloudflare.com/api/auth/callback"
+  "https://liabilities-ranks-ate-asset.trycloudflare.com/auth/callback",
+  "https://liabilities-ranks-ate-asset.trycloudflare.com/auth/shopify/callback",
+  "https://liabilities-ranks-ate-asset.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
@@ -34,3 +34,4 @@ embedded = false
 [build]
 dev_store_url = "sagy-test-academy.myshopify.com"
 automatically_update_urls_on_dev = true
+include_config_on_deploy = true
